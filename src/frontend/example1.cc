@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "network.hh"
+
 using namespace std;
 using namespace Eigen;
 
