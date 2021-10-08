@@ -27,6 +27,9 @@ void program_body()
   Layer<40, 50> mylayer;
   array<float, 40> myinput;
   mylayer.apply( myinput );
+
+  Network<30, 40, 50, 60> mynetwork;
+  mynetwork.forward_pass();
 }
 
 int main()
