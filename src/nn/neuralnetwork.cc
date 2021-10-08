@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include "timer.hh"
 
 
 using namespace std;
@@ -91,22 +92,27 @@ void NeuralNetwork::forward_propagation(ColVector& input)
 {
   // setting the input layer of the NN
   // block takes 4 arguments : startRow, startCol, blockRows, blockCols
-  neuronLayers.front()->block(0, 0, 1, neuronLayers.front()->size() - 1) = input;
+
+  neuronLayers.front()->block(0, 0, neuronLayers.front()->size() - 1, 1) = input;
 
   // forward propagation
   for (uint i = 1; i < topology.size(); i++) {
     (*cacheLayers[i]) = (*weights[i - 1]) * (*neuronLayers[i - 1]);
-    // neuronLayers[i]->block(0, 0, 1, topology[i]) = activationFunction(cacheLayers[i]->block(0, 0, 1, topology[i]))
+    (*neuronLayers[i]) = (*cacheLayers[i]);
+    // neuronLayers[i]->block(0, 0, topology[i], 1) = activationFunction(cacheLayers[i]->block(0, 0, topology[i], 1))
   }
 }
 
 void program_body()
 {
   vector<uint> TOPOLOGY = {5, 3, 2, 1};
-  ColVector input;
+  ColVector input(5);
   input << 1.0f, -2.0f, 3.0f, -2.0f, 0.0f;
   NeuralNetwork nn(TOPOLOGY);
+  uint64_t start = Timer::timestamp_ns();
   nn.forward_propagation(input);
+  uint64_t end = Timer::timestamp_ns();
+  cout << end - start << endl;
 }
 
 int main()
