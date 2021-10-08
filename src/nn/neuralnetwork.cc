@@ -25,25 +25,37 @@ class NeuralNetwork {
     // EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign)
 
     NeuralNetwork(vector<uint> topology, float learningRate = 0.005f);
- 
-    void forward_propagation(ColVector& input);
+
+    ColVector forward_propagation(ColVector& input);
     void backward_propagation(ColVector& output);
     void error_calculation(ColVector& output);
     void update_weights();
 
     float activationFunction(float x){
-        return max(x, 0.0f);
+      return max(x, 0.0f);
     }
- 
+
     ColVector activationFunction(ColVector& x){
-        return x.cwiseMax(0);
+      return x.cwiseMax(0);
     }
- 
+
     float activationFunctionDerivative(float x){
-        if (x >= 0)
-          return 1;
-        else
-          return 0;
+      if (x >= 0)
+        return 1;
+      else
+        return 0;
+    }
+
+    void print(){
+      const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+      for(uint i = 1; i < topology.size(); i++){
+        cout << "Weights Layer " << i << ":\n"
+           << (*weights[i - 1]).format( CleanFmt ) << "\n\n"
+           << "cacheLayers: Layer " << i << ":\n"
+           << (*cacheLayers[i]).format( CleanFmt ) << "\n\n"
+           << "neuronLayers Layer " << i << ":\n"
+           << (*neuronLayers[i]).format( CleanFmt ) << "\n\n";
+      }
     }
 };
 
@@ -88,7 +100,7 @@ NeuralNetwork::NeuralNetwork(vector<uint> topology_, float learningRate_): neuro
   }
 }
 
-void NeuralNetwork::forward_propagation(ColVector& input)
+ColVector NeuralNetwork::forward_propagation(ColVector& input)
 {
   // setting the input layer of the NN
   // block takes 4 arguments : startRow, startCol, blockRows, blockCols
@@ -96,11 +108,18 @@ void NeuralNetwork::forward_propagation(ColVector& input)
   neuronLayers.front()->block(0, 0, neuronLayers.front()->size() - 1, 1) = input;
 
   // forward propagation
-  for (uint i = 1; i < topology.size(); i++) {
+  for (uint i = 1; i < topology.size() - 1; i++) {
     (*cacheLayers[i]) = (*weights[i - 1]) * (*neuronLayers[i - 1]);
-    (*neuronLayers[i]) = (*cacheLayers[i]);
-    // neuronLayers[i]->block(0, 0, topology[i], 1) = activationFunction(cacheLayers[i]->block(0, 0, topology[i], 1))
+    (*neuronLayers[i]) = activationFunction(*cacheLayers[i]);
+    //resetting back the bias NN node
+    neuronLayers[i]->coeffRef(topology[i]) = 1.0;
   }
+  // no activation at last layer
+  uint i = topology.size() - 1;
+  (*cacheLayers[i]) = (*weights[i - 1]) * (*neuronLayers[i - 1]);
+  (*neuronLayers[i]) = *cacheLayers[i];
+
+  return *neuronLayers[topology.size()-1];
 }
 
 void program_body()
@@ -110,9 +129,18 @@ void program_body()
   input << 1.0f, -2.0f, 3.0f, -2.0f, 0.0f;
   NeuralNetwork nn(TOPOLOGY);
   uint64_t start = Timer::timestamp_ns();
-  nn.forward_propagation(input);
+  ColVector output = nn.forward_propagation(input);
   uint64_t end = Timer::timestamp_ns();
   cout << end - start << endl;
+
+  const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+
+  cout << "input:\n"
+       << input.format( CleanFmt ) << "\n\n"
+       << "output:\n"
+       << output.format( CleanFmt ) << "\n\n";
+  nn.print();
+
 }
 
 int main()
