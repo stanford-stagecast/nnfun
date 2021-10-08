@@ -1,4 +1,5 @@
 #include <Eigen/Dense>
+#include <array>
 #include <cstdlib>
 #include <iostream>
 
@@ -22,6 +23,10 @@ void program_body()
   cout << layer1.format( CleanFmt ) << "\n*\n"
        << input.format( CleanFmt ) << "\n=\n"
        << output.format( CleanFmt ) << "\n";
+
+  Layer<40, 50> mylayer;
+  array<float, 40> myinput;
+  mylayer.apply( myinput );
 }
 
 int main()
