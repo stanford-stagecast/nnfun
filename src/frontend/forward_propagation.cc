@@ -23,19 +23,35 @@ template<unsigned int batch_size_, unsigned int input_size_, unsigned int output
 class Layer
 {
 private:
-  Matrix<float, output_size_, batch_size_> output_ = {};
-  Matrix<float, output_size_, batch_size_> unactivated_output_ = {};
-  Matrix<float, output_size_, input_size_> weights = Matrix<float, output_size_, input_size_>::Random();
+  Matrix<float, batch_size_, output_size_> output_ = {};
+  Matrix<float, batch_size_, output_size_> unactivated_output_ = {};
+  Matrix<float, input_size_, output_size_> weights_ = Matrix<float, input_size_, output_size_>::Random();
 
 public:
-  void apply( const Matrix<float, input_size_, batch_size_>& input )
+  void apply( const Matrix<float, batch_size_, input_size_>& input )
   {
-    unactivated_output_ = weights * input;
+    unactivated_output_ = input * weights_;
     output_ = unactivated_output_.cwiseMax( 0 );
   }
 
-  const Matrix<float, output_size_, batch_size_>& output() const { return output_; }
-  const Matrix<float, output_size_, batch_size_>& unactivated_output() const { return unactivated_output_; }
+  void print( int layer_num, bool is_final_layer = false )
+  {
+    const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+
+    cout << "Layer " << layer_num << endl;
+    cout << "input size: " << input_size_ << " -> "
+         << "output_size: " << output_size_ << endl
+         << endl;
+
+    cout << "weights:" << endl << weights_.format( CleanFmt ) << endl << endl;
+    cout << "unactivated_output:" << endl << unactivated_output_.format( CleanFmt ) << endl << endl;
+    if ( not is_final_layer ) {
+      cout << "output:" << endl << output_.format( CleanFmt ) << endl << endl << endl;
+    }
+  }
+
+  const Matrix<float, batch_size_, output_size_>& output() const { return output_; }
+  const Matrix<float, batch_size_, output_size_>& unactivated_output() const { return unactivated_output_; }
 
   unsigned int input_size() const { return input_size_; }
   unsigned int output_size() const { return output_size_; }
@@ -53,13 +69,19 @@ public:
   Layer<b, i0, o0> layer0 = {};
   Network<b, o0, rest...> next = {};
 
-  void apply( const Matrix<float, i0, b>& input )
+  void apply( const Matrix<float, b, i0>& input )
   {
     layer0.apply( input );
     next.apply( layer0.output() );
   }
 
-  const Matrix<float, output_size, b>& output() const { return next.output(); }
+  void print( int layer_num = 1 )
+  {
+    layer0.print( layer_num );
+    next.print( layer_num + 1 );
+  }
+
+  const Matrix<float, b, output_size>& output() const { return next.output(); }
 };
 
 // BASE CASE
@@ -72,29 +94,27 @@ public:
   constexpr static unsigned int batch_size = b;
 
   Layer<b, i0, o0> layer0 = {};
-  void apply( const Matrix<float, i0, b>& input ) { layer0.apply( input ); }
-  const Matrix<float, o0, b>& output() const { return layer0.unactivated_output(); }
+  void apply( const Matrix<float, b, i0>& input ) { layer0.apply( input ); }
+  const Matrix<float, b, o0>& output() const { return layer0.unactivated_output(); }
+
+  void print( int layer_num = 1 ) { layer0.print( layer_num, true ); }
 };
 
 int main()
 {
   Network<2, 5, 3, 2, 1> nn;
 
-  Matrix<float, 5, 2> inputs;
-  inputs << 1, -1, 2, -2, 3, -3, 4, -4, 5, -5;
+  Matrix<float, 2, 5> inputs;
+  inputs << 1, 2, 3, 4, 5, -1, -2, -3, -4, -5;
 
   nn.apply( inputs );
   auto& outputs = nn.output();
 
   const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
 
-  cout << "input size: " << nn.input_size << endl;
-  cout << nn.layer0.input_size() << " -> " << nn.layer0.output_size() << endl;
-  cout << nn.next.layer0.input_size() << " -> " << nn.next.layer0.output_size() << endl;
-  cout << nn.next.next.layer0.input_size() << " -> " << nn.next.next.layer0.output_size() << endl;
-  cout << "output size: " << nn.output_size << endl;
-
-  cout << outputs.format( CleanFmt ) << "\n";
+  cout << "input:" << endl << inputs.format( CleanFmt ) << endl << endl;
+  nn.print();
+  cout << "output:" << endl << outputs.format( CleanFmt ) << endl;
 
   return 0;
 }
