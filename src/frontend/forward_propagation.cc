@@ -1,27 +1,67 @@
+#include "exception.hh"
 #include "network.hh"
 #include "timer.hh"
+
 #include <Eigen/Dense>
 #include <iostream>
+#include <utility>
+
+#include <sys/resource.h>
+#include <sys/time.h>
 
 using namespace std;
 using namespace Eigen;
 
-int main()
+constexpr size_t batch_size = 1;
+constexpr size_t input_size = 1;
+
+void program_body( const unsigned int num_iterations )
 {
-  srand( time( NULL ) );
-  Network<2, 5, 3, 2, 1> nn;
+  /* remove limit on stack size */
+  const rlimit limits { RLIM_INFINITY, RLIM_INFINITY };
+  CheckSystemCall( "setrlimit", setrlimit( RLIMIT_STACK, &limits ) );
 
-  Matrix<float, 2, 5> inputs;
-  inputs << 1, 2, 3, 4, 5, -1, -2, -3, -4, -5;
+  /* seed C RNG for Eigen random weight initialization */
+  srand( Timer::timestamp_ns() );
 
+  /* construct neural network on heap */
+  auto nn = make_unique<Network<batch_size, input_size, 1024, 1024, 1024, 1024, 1024, 1024, 1>>();
+
+  /* initialize inputs */
+  vector<Matrix<float, batch_size, input_size>> inputs;
+  for ( unsigned int i = 0; i < num_iterations; i++ ) {
+    inputs.emplace_back( Matrix<float, batch_size, input_size>::Random() );
+  }
+
+  /* run benchmark */
   uint64_t start = Timer::timestamp_ns();
-  nn.apply( inputs );
+  for ( unsigned int i = 0; i < num_iterations; i++ ) {
+    nn->apply( inputs[i] );
+  }
   uint64_t end = Timer::timestamp_ns();
-  cout << "TIME: " << end - start << endl;
 
-  const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
-  cout << "input:" << endl << inputs.format( CleanFmt ) << endl << endl;
-  nn.print();
+  cout << "Average runtime (over " << num_iterations << " iterations, batch size=" << batch_size << "): ";
+  Timer::pp_ns( cout, ( end - start ) / float( num_iterations ) );
+  cout << " per iteration\n";
+}
 
-  return 0;
+int main( int argc, char* argv[] )
+{
+  try {
+    if ( argc <= 0 ) {
+      abort();
+    }
+
+    if ( argc != 2 ) {
+      cerr << "Usage: " << argv[0] << " NUM_ITERATIONS\n";
+      return EXIT_FAILURE;
+    }
+
+    program_body( stoi( argv[1] ) );
+
+    return EXIT_SUCCESS;
+  } catch ( const exception& e ) {
+    cerr << e.what() << "\n";
+    return EXIT_FAILURE;
+  }
 }
