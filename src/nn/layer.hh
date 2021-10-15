@@ -25,7 +25,7 @@ public:
     output_ = ( input * weights_ );
   }
 
-  void print( int layer_num )
+  void print( const unsigned int layer_num ) const
   {
     const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
 
@@ -34,10 +34,11 @@ public:
          << "output_size: " << output_size_ << endl
          << endl;
 
-    cout << "weights:" << endl << weights_.format( CleanFmt ) << endl << endl;
-    cout << "output:" << endl << output_.format( CleanFmt ) << endl << endl << endl;
+    cout << "weights:" << endl << weights().format( CleanFmt ) << endl << endl;
+    cout << "output:" << endl << output().format( CleanFmt ) << endl << endl << endl;
   }
 
+  const Matrix<float, input_size_, output_size_>& weights() const { return weights_; }
   const Matrix<float, batch_size_, output_size_>& output() const { return output_; }
 
   static constexpr unsigned int input_size() { return input_size_; }

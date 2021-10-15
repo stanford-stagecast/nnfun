@@ -34,7 +34,7 @@ public:
     next.apply( layer0.output() );
   }
 
-  void print( int layer_num = 1 )
+  void print( const unsigned int layer_num = 0 ) const
   {
     layer0.print( layer_num );
     next.print( layer_num + 1 );
@@ -56,5 +56,5 @@ public:
   void apply( const Matrix<float, b, i0>& input ) { layer0.apply_without_activation( input ); }
   const Matrix<float, b, o0>& output() const { return layer0.output(); }
 
-  void print( int layer_num = 1 ) { layer0.print( layer_num ); }
+  void print( const unsigned int layer_num = 0 ) const { layer0.print( layer_num ); }
 };
