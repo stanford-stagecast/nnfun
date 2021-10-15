@@ -20,6 +20,11 @@ public:
     output_ = ( input * weights_ ).cwiseMax( 0 );
   }
 
+  void apply_without_activation( const Matrix<float, batch_size_, input_size_>& input )
+  {
+    output_ = ( input * weights_ );
+  }
+
   void print( int layer_num )
   {
     const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );

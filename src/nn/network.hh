@@ -53,8 +53,8 @@ public:
   constexpr static unsigned int batch_size = b;
 
   Layer<b, i0, o0> layer0;
-  void apply( const Matrix<float, b, i0>& input ) { layer0.apply( input ); }
-  const Matrix<float, b, o0>& output() const { return layer0.unactivated_output(); }
+  void apply( const Matrix<float, b, i0>& input ) { layer0.apply_without_activation( input ); }
+  const Matrix<float, b, o0>& output() const { return layer0.output(); }
 
   void print( int layer_num = 1 ) { layer0.print( layer_num ); }
 };
