@@ -1,14 +1,47 @@
 #pragma once
 
-#include <array>
+#include <Eigen/Dense>
+#include <cstdlib>
+#include <iostream>
 
-template<unsigned int input_size, unsigned int output_size>
+using namespace std;
+using namespace Eigen;
+
+template<unsigned int batch_size_, unsigned int input_size_, unsigned int output_size_>
 class Layer
 {
-  std::array<float, output_size> activations_;
+private:
+  Matrix<float, batch_size_, output_size_> output_ = {};
+  Matrix<float, batch_size_, output_size_> unactivated_output_ = {};
+  Matrix<float, input_size_, output_size_> weights_ = Matrix<float, input_size_, output_size_>::Random();
 
 public:
-  void apply( const std::array<float, input_size>& input __attribute( ( unused ) ) ) {}
+  void apply( const Matrix<float, batch_size_, input_size_>& input )
+  {
+    unactivated_output_ = input * weights_;
+    output_ = unactivated_output_.cwiseMax( 0 );
+  }
 
-  const std::array<float, output_size>& activations() const { return activations_; }
+  void print( int layer_num, bool is_final_layer = false )
+  {
+    const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+
+    cout << "Layer " << layer_num << endl;
+    cout << "input size: " << input_size_ << " -> "
+         << "output_size: " << output_size_ << endl
+         << endl;
+
+    cout << "weights:" << endl << weights_.format( CleanFmt ) << endl << endl;
+    cout << "unactivated_output:" << endl << unactivated_output_.format( CleanFmt ) << endl << endl;
+    if ( not is_final_layer ) {
+      cout << "output:" << endl << output_.format( CleanFmt ) << endl << endl << endl;
+    }
+  }
+
+  const Matrix<float, batch_size_, output_size_>& output() const { return output_; }
+  const Matrix<float, batch_size_, output_size_>& unactivated_output() const { return unactivated_output_; }
+
+  unsigned int input_size() const { return input_size_; }
+  unsigned int output_size() const { return output_size_; }
+  unsigned int batch_size() const { return batch_size_; }
 };
