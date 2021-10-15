@@ -1,10 +1,9 @@
 #include "layer.hh"
-#include <Eigen/Dense>
-#include <cstdlib>
-#include <iostream>
+// #include <Eigen/Dense>
+// #include <iostream>
 
-using namespace std;
-using namespace Eigen;
+// using namespace std;
+// using namespace Eigen;
 
 // template<unsigned int batch_size_, unsigned int input_size_, unsigned int output_size_>
 // void Layer<batch_size_, input_size_, output_size_>::apply( const Matrix<float, batch_size_, input_size_>& input )

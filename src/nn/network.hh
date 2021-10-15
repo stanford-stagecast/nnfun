@@ -1,9 +1,6 @@
 #pragma once
 
 #include "layer.hh"
-#include <Eigen/Dense>
-#include <cstdlib>
-#include <iostream>
 
 using namespace std;
 using namespace Eigen;
