@@ -17,13 +17,9 @@ int main()
   inputs << 1, 2, 3, 4, 5, -1, -2, -3, -4, -5;
 
   nn.apply( inputs );
-  auto& outputs = nn.output();
 
   const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
-
   cout << "input:" << endl << inputs.format( CleanFmt ) << endl << endl;
   nn.print();
-  cout << "output:" << endl << outputs.format( CleanFmt ) << endl;
-
   return 0;
 }

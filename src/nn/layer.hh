@@ -14,15 +14,22 @@ private:
   Matrix<float, batch_size_, output_size_> output_ = {};
   Matrix<float, batch_size_, output_size_> unactivated_output_ = {};
   Matrix<float, input_size_, output_size_> weights_ = Matrix<float, input_size_, output_size_>::Random();
+  bool is_final_layer_ = false;
 
 public:
+  Layer( bool is_final_layer ) { is_final_layer_ = is_final_layer; }
+  Layer() {}
   void apply( const Matrix<float, batch_size_, input_size_>& input )
   {
     unactivated_output_ = input * weights_;
-    output_ = unactivated_output_.cwiseMax( 0 );
+    if ( not is_final_layer_ ) {
+      output_ = unactivated_output_.cwiseMax( 0 );
+    } else {
+      output_ = unactivated_output_;
+    }
   }
 
-  void print( int layer_num, bool is_final_layer = false )
+  void print( int layer_num )
   {
     const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
 
@@ -33,9 +40,7 @@ public:
 
     cout << "weights:" << endl << weights_.format( CleanFmt ) << endl << endl;
     cout << "unactivated_output:" << endl << unactivated_output_.format( CleanFmt ) << endl << endl;
-    if ( not is_final_layer ) {
-      cout << "output:" << endl << output_.format( CleanFmt ) << endl << endl << endl;
-    }
+    cout << "output:" << endl << output_.format( CleanFmt ) << endl << endl << endl;
   }
 
   const Matrix<float, batch_size_, output_size_>& output() const { return output_; }
