@@ -6,21 +6,18 @@
 using namespace std;
 using namespace Eigen;
 
-template<unsigned int batch_size_, unsigned int input_size_, unsigned int output_size_>
+template<unsigned int batch_size, unsigned int input_size, unsigned int output_size>
 class Layer
 {
 private:
-  Matrix<float, batch_size_, output_size_> output_ = {};
-  Matrix<float, input_size_, output_size_> weights_ = Matrix<float, input_size_, output_size_>::Random();
+  Matrix<float, batch_size, output_size> output_ = {};
+  Matrix<float, input_size, output_size> weights_ = Matrix<float, input_size, output_size>::Random();
 
 public:
   Layer() {}
-  void apply( const Matrix<float, batch_size_, input_size_>& input )
-  {
-    output_ = ( input * weights_ ).cwiseMax( 0 );
-  }
+  void apply( const Matrix<float, batch_size, input_size>& input ) { output_ = ( input * weights_ ).cwiseMax( 0 ); }
 
-  void apply_without_activation( const Matrix<float, batch_size_, input_size_>& input )
+  void apply_without_activation( const Matrix<float, batch_size, input_size>& input )
   {
     output_ = ( input * weights_ );
   }
@@ -30,18 +27,14 @@ public:
     const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
 
     cout << "Layer " << layer_num << endl;
-    cout << "input size: " << input_size_ << " -> "
-         << "output_size: " << output_size_ << endl
+    cout << "input size: " << input_size << " -> "
+         << "output_size: " << output_size << endl
          << endl;
 
     cout << "weights:" << endl << weights().format( CleanFmt ) << endl << endl;
     cout << "output:" << endl << output().format( CleanFmt ) << endl << endl << endl;
   }
 
-  const Matrix<float, input_size_, output_size_>& weights() const { return weights_; }
-  const Matrix<float, batch_size_, output_size_>& output() const { return output_; }
-
-  static constexpr unsigned int input_size() { return input_size_; }
-  static constexpr unsigned int output_size() { return output_size_; }
-  static constexpr unsigned int batch_size() { return batch_size_; }
+  const Matrix<float, input_size, output_size>& weights() const { return weights_; }
+  const Matrix<float, batch_size, output_size>& output() const { return output_; }
 };
