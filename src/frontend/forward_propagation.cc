@@ -2,6 +2,7 @@
 #include "timer.hh"
 #include <Eigen/Dense>
 #include <iostream>
+#include <utility>
 
 using namespace std;
 using namespace Eigen;
@@ -9,19 +10,21 @@ using namespace Eigen;
 int main()
 {
   srand( time( NULL ) );
-  Network<2, 5, 3, 2, 1> nn;
+  auto nn
+    = make_unique<Network<1, 128, 256, 512, 1024, 2048, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1>>();
 
-  Matrix<float, 2, 5> inputs;
-  inputs << 1, 2, 3, 4, 5, -1, -2, -3, -4, -5;
+  Matrix<float, 1, 128> inputs {};
 
   uint64_t start = Timer::timestamp_ns();
-  nn.apply( inputs );
+  nn->apply( inputs );
   uint64_t end = Timer::timestamp_ns();
   cout << "TIME: " << end - start << endl;
 
+  /*
   const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
   cout << "input:" << endl << inputs.format( CleanFmt ) << endl << endl;
   nn.print();
+  */
 
   return 0;
 }

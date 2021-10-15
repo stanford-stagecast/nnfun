@@ -10,8 +10,8 @@ template<unsigned int batch_size, unsigned int input_size, unsigned int output_s
 class Layer
 {
 private:
-  Matrix<float, batch_size, output_size> output_ = {};
-  Matrix<float, input_size, output_size> weights_ = Matrix<float, input_size, output_size>::Random();
+  Matrix<float, batch_size, output_size> output_ {};
+  Matrix<float, input_size, output_size> weights_ {};
 
 public:
   Layer() {}
