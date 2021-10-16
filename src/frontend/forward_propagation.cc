@@ -34,11 +34,11 @@ void program_body( const unsigned int num_iterations )
   }
 
   /* run benchmark */
-  uint64_t start = Timer::timestamp_ns();
+  const uint64_t start = Timer::timestamp_ns();
   for ( unsigned int i = 0; i < num_iterations; i++ ) {
     nn->apply( inputs[i] );
   }
-  uint64_t end = Timer::timestamp_ns();
+  const uint64_t end = Timer::timestamp_ns();
 
   cout << "Average runtime (over " << num_iterations << " iterations, batch size=" << batch_size << "): ";
   Timer::pp_ns( cout, ( end - start ) / float( num_iterations ) );
