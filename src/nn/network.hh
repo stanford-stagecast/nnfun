@@ -5,24 +5,10 @@
 using namespace std;
 using namespace Eigen;
 
-template<unsigned int n0, unsigned int... rest>
-struct last_element
-{
-  constexpr static unsigned int value = last_element<rest...>::value;
-};
-
-template<unsigned int n>
-struct last_element<n>
-{
-  constexpr static unsigned int value = n;
-};
-
 template<unsigned int batch_size, unsigned int i0, unsigned int o0, unsigned int... rest>
 class Network
 {
 public:
-  constexpr static unsigned int output_size = last_element<o0, rest...>::value;
-
   Layer<batch_size, i0, o0> layer0 = {};
   Network<batch_size, o0, rest...> next = {};
 
@@ -38,6 +24,8 @@ public:
     next.print( layer_num + 1 );
   }
 
+  constexpr static unsigned int output_size = decltype( next )::output_size;
+
   const Matrix<float, batch_size, output_size>& output() const { return next.output(); }
 };
 
@@ -49,6 +37,8 @@ public:
   Layer<batch_size, i0, o0> layer0;
   void apply( const Matrix<float, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
   const Matrix<float, batch_size, o0>& output() const { return layer0.output(); }
+
+  constexpr static unsigned int output_size = o0;
 
   void print( const unsigned int layer_num = 0 ) const { layer0.print( layer_num ); }
 };
