@@ -34,7 +34,7 @@ template<unsigned int batch_size, unsigned int i0, unsigned int o0>
 class Network<batch_size, i0, o0>
 {
 public:
-  Layer<batch_size, i0, o0> layer0;
+  Layer<batch_size, i0, o0> layer0 {};
 
   constexpr static unsigned int output_size = o0;
 

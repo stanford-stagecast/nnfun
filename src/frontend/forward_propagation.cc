@@ -38,6 +38,11 @@ void program_body( const unsigned int num_iterations )
   for ( unsigned int i = 0; i < num_iterations; i++ ) {
     nn->apply( inputs[i] );
   }
+
+  // const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+  // cout << "input:" << endl << inputs[num_iterations-1].format( CleanFmt ) << endl << endl;
+  // nn->print();
+
   const uint64_t end = Timer::timestamp_ns();
 
   cout << "Average runtime (over " << num_iterations << " iterations, batch size=" << batch_size << "): ";
