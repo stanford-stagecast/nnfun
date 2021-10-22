@@ -11,11 +11,18 @@ class Layer
 {
 private:
   Matrix<float, batch_size, output_size> output_ {};
-  Matrix<float, input_size, output_size> weights_ = Matrix<float, input_size, output_size>::Random();
-  Matrix<float, batch_size, output_size> biases_ = Matrix<float, batch_size, output_size>::Random();
+  Matrix<float, input_size, output_size> weights_ {};
+  Matrix<float, batch_size, output_size> biases_ {};
 
 public:
   Layer() {}
+
+  void initializeWeightsRandomly()
+  {
+    weights_ = Matrix<float, input_size, output_size>::Random();
+    biases_ = Matrix<float, batch_size, output_size>::Random();
+  }
+
   void apply( const Matrix<float, batch_size, input_size>& input )
   {
     output_ = ( input * weights_ + biases_ ).cwiseMax( 0 );

@@ -26,6 +26,8 @@ void program_body( const unsigned int num_iterations )
 
   /* construct neural network on heap */
   auto nn = make_unique<Network<batch_size, input_size, 1024, 1024, 1024, 1024, 1024, 1024, 1>>();
+  // auto nn = make_unique<Network<batch_size, input_size, 5, 3, 2, 1>>();
+  nn->initializeWeightsRandomly();
 
   /* initialize inputs */
   vector<Matrix<float, batch_size, input_size>> inputs;

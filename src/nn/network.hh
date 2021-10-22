@@ -13,7 +13,11 @@ public:
   Network<batch_size, o0, rest...> next {};
 
   constexpr static unsigned int output_size = decltype( next )::output_size;
-
+  void initializeWeightsRandomly()
+  {
+    layer0.initializeWeightsRandomly();
+    next.initializeWeightsRandomly();
+  }
   void apply( const Matrix<float, batch_size, i0>& input )
   {
     layer0.apply( input );
@@ -37,6 +41,8 @@ public:
   Layer<batch_size, i0, o0> layer0 {};
 
   constexpr static unsigned int output_size = o0;
+
+  void initializeWeightsRandomly() { layer0.initializeWeightsRandomly(); }
 
   void apply( const Matrix<float, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
 
