@@ -12,7 +12,7 @@
 using namespace std;
 using namespace Eigen;
 
-constexpr size_t batch_size = 1;
+constexpr size_t batch_size = 3;
 constexpr size_t input_size = 1;
 
 void program_body( const unsigned int num_iterations )
