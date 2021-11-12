@@ -41,6 +41,16 @@ public:
     return layer0.getNumParams();
   }
 
+  float getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
+  {
+    if ( layerNum > 0 ) {
+      return next.getEvaluatedGradient( layerNum - 1, paramNum );
+    }
+
+    assert( layerNum == 0 );
+    return layer0.getEvaluatedGradient( paramNum );
+  }
+
   float calculateNumericalGradient( const Matrix<float, batch_size, i0>& input,
                                     const unsigned int layerNum,
                                     const unsigned int weightNum,
@@ -57,24 +67,46 @@ public:
     apply( input );
     Matrix<float, batch_size, output_size> fXPlusEpsilon = output();
 
-    // const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
-    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
-
-    // cout << "fXPlusEpsilon" << endl;
-    // print();
-
-    // f(X)
-    layer0.perturbWeight( weightNum, -epsilon );
+    // f(X-epsilon)
+    layer0.perturbWeight( weightNum, -2 * epsilon );
     apply( input );
-    Matrix<float, batch_size, output_size> fX = output();
+    Matrix<float, batch_size, output_size> fXMinusEpsilon = output();
 
-    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
+    // f(X) restore network to original state
+    layer0.perturbWeight( weightNum, epsilon );
+    apply( input );
 
-    // cout << "fX" << endl;
-    // print();
-    const Matrix<float, batch_size, output_size>& derivative = ( fXPlusEpsilon - fX ) / epsilon;
-    // cout << endl << endl << endl;
+    const Matrix<float, batch_size, output_size>& derivative = ( fXPlusEpsilon - fXMinusEpsilon ) / ( 2 * epsilon );
     return derivative.sum() / batch_size;
+  }
+
+  unsigned int getLayerInputSize( const unsigned int layerNum ) const
+  {
+    if ( layerNum > 0 ) {
+      return next.getLayerInputSize( layerNum - 1 );
+    }
+    assert( layerNum == 0 );
+    return layer0.getInputSize();
+  }
+  unsigned int getLayerOutputSize( const unsigned int layerNum ) const
+  {
+    if ( layerNum > 0 ) {
+      return next.getLayerOutputSize( layerNum - 1 );
+    }
+    assert( layerNum == 0 );
+    return layer0.getOutputSize();
+  }
+
+  const Matrix<float, 1, i0> computeDeltas()
+  {
+    Matrix<float, 1, o0> nextLayerDeltas = next.computeDeltas();
+    return layer0.computeDeltas( nextLayerDeltas );
+  }
+
+  void evaluateGradients( const Matrix<float, batch_size, i0>& input )
+  {
+    layer0.evaluateGradients( input );
+    next.evaluateGradients( layer0.output() );
   }
 
   const Matrix<float, batch_size, output_size>& output() const { return next.output(); }
@@ -104,6 +136,13 @@ public:
     return layer0.getNumParams();
   }
 
+  float getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
+  {
+    assert( layerNum == 0 );
+    (void)layerNum;
+    return layer0.getEvaluatedGradient( paramNum );
+  }
+
   float calculateNumericalGradient( const Matrix<float, batch_size, i0>& input,
                                     const unsigned int layerNum,
                                     const unsigned int weightNum,
@@ -111,31 +150,45 @@ public:
   {
     assert( layerNum == 0 );
     (void)layerNum;
-
     // f(X+epsilon)
     layer0.perturbWeight( weightNum, epsilon );
     apply( input );
+    Matrix<float, batch_size, output_size> fXPlusEpsilon = output();
 
-    // const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
-    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
+    // f(X-epsilon)
+    layer0.perturbWeight( weightNum, -2 * epsilon );
+    apply( input );
+    Matrix<float, batch_size, output_size> fXMinusEpsilon = output();
 
-    Matrix<float, batch_size, o0> fXPlusEpsilon = output();
-    // print();
-    // cout << "fXPlusEpsilon" << fXPlusEpsilon.format( CleanFmt ) << endl;
-
-    // f(X)
-    layer0.perturbWeight( weightNum, -epsilon );
+    // f(X) restore network to original state
+    layer0.perturbWeight( weightNum, epsilon );
     apply( input );
 
-    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
-
-    Matrix<float, batch_size, o0> fX = output();
-    // print();
-    // cout << "fX" << fX.format( CleanFmt ) << endl;
-    Matrix<float, batch_size, o0> derivative = ( fXPlusEpsilon - fX ) / epsilon;
-
+    const Matrix<float, batch_size, output_size>& derivative = ( fXPlusEpsilon - fXMinusEpsilon ) / ( 2 * epsilon );
     return derivative.sum() / batch_size;
   }
+
+  unsigned int getLayerInputSize( const unsigned int layerNum ) const
+  {
+    assert( layerNum == 0 );
+    (void)layerNum;
+    return layer0.getInputSize();
+  }
+
+  unsigned int getLayerOutputSize( const unsigned int layerNum ) const
+  {
+    assert( layerNum == 0 );
+    (void)layerNum;
+    return layer0.getOutputSize();
+  }
+
+  const Matrix<float, 1, i0> computeDeltas()
+  {
+    Matrix<float, 1, o0> nextLayerDeltas = Matrix<float, 1, o0>::Ones();
+    return layer0.computeDeltasLastLayer( nextLayerDeltas );
+  }
+
+  void evaluateGradients( const Matrix<float, batch_size, i0>& input ) { layer0.evaluateGradients( input ); }
 
   const Matrix<float, batch_size, o0>& output() const { return layer0.output(); }
 };

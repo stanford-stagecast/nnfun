@@ -4,6 +4,7 @@ macro (add_test_exec exec_name)
 endmacro (add_test_exec)
 
 add_test_exec (forward_propagation)
-add_test_exec (back_propagation)
-
+add_test_exec (back_propagation_numerical)
+add_test_exec (back_propagation_formula)
+add_test_exec (back_propagation_formula_check)
 add_executable (neuralnetwork "neuralnetwork.cc")
