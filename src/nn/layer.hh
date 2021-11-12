@@ -25,12 +25,12 @@ public:
 
   void apply( const Matrix<float, batch_size, input_size>& input )
   {
-    output_ = ( (input * weights_).rowwise() + biases_ ).cwiseMax( 0 );
+    output_ = ( ( input * weights_ ).rowwise() + biases_ ).cwiseMax( 0 );
   }
 
   void apply_without_activation( const Matrix<float, batch_size, input_size>& input )
   {
-    output_ = ( (input * weights_).rowwise() + biases_ );
+    output_ = ( ( input * weights_ ).rowwise() + biases_ );
   }
 
   void print( const unsigned int layer_num ) const
