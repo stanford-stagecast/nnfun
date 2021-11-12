@@ -1,7 +1,9 @@
-add_executable (forward_propagation "forward_propagation.cc")
-target_link_libraries (forward_propagation util)
-#target_link_libraries (forward_propagation nn)
-target_link_libraries ("forward_propagation" ${Eigen_LDFLAGS})
-target_link_libraries ("forward_propagation" ${Eigen_LDFLAGS_OTHER})
+macro (add_test_exec exec_name)
+    add_executable ("${exec_name}" "${exec_name}.cc")
+    target_link_libraries ("${exec_name}" util ${Eigen_LDFLAGS} ${Eigen_LDFLAGS_OTHER})
+endmacro (add_test_exec)
+
+add_test_exec (forward_propagation)
+add_test_exec (back_propagation)
 
 add_executable (neuralnetwork "neuralnetwork.cc")

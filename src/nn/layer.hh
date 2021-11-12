@@ -47,6 +47,19 @@ public:
     cout << "output:" << endl << output().format( CleanFmt ) << endl << endl << endl;
   }
 
+  void perturbWeight( const unsigned int weight_num, const float epsilon )
+  {
+    const unsigned int i = weight_num / output_size;
+    const unsigned int j = weight_num % output_size;
+    if ( i < input_size ) {
+      weights_( i, j ) += epsilon;
+    } else {
+      biases_( 0, j ) += epsilon;
+    }
+  }
+
+  unsigned int getNumParams() const { return ( input_size + 1 ) * output_size; }
+
   const Matrix<float, input_size, output_size>& weights() const { return weights_; }
   const Matrix<float, batch_size, output_size>& output() const { return output_; }
   const Matrix<float, 1, output_size>& biases() const { return biases_; }
