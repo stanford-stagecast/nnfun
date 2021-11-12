@@ -25,7 +25,7 @@ void program_body( const unsigned int num_iterations, const float epsilon )
   srand( Timer::timestamp_ns() );
 
   /* construct neural network on heap */
-  auto nn = make_unique<Network<batch_size, input_size, 1>>();
+  auto nn = make_unique<Network<batch_size, input_size, 5, 3, 2, 1>>();
   nn->initializeWeightsRandomly();
 
   /* initialize inputs */
@@ -48,12 +48,10 @@ void program_body( const unsigned int num_iterations, const float epsilon )
   }
 
   for ( unsigned int i = 0; i < num_iterations; i++ ) {
-    float gradient = nn->calculateNumericalGradient( input, 1, 0, epsilon );
+    float gradient = nn->calculateNumericalGradient( input, gradientLayerNums[i], gradientWeightNums[i], epsilon );
     cout << "Iteration " << i << ":\n"
-         << "  RandomLayer " << gradientLayerNums[i] << "\n"
-         << "  RandomWeight " << gradientWeightNums[i] << "\n"
-         << "  Layer " << 1 << "\n"
-         << "  Weight " << 0 << "\n"
+         << "  Layer " << gradientLayerNums[i] << "\n"
+         << "  Weight " << gradientWeightNums[i] << "\n"
          << "  Gradient " << gradient << "\n\n\n\n";
   }
 

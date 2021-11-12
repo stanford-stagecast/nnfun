@@ -55,26 +55,26 @@ public:
     // f(X+epsilon)
     layer0.perturbWeight( weightNum, epsilon );
     apply( input );
-    const Matrix<float, batch_size, output_size>& fXPlusEpsilon = output();
+    Matrix<float, batch_size, output_size> fXPlusEpsilon = output();
 
-    const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
-    cout << "input:" << endl << input.format( CleanFmt ) << endl;
+    // const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
 
-    cout << "fXPlusEpsilon" << endl;
-    print();
+    // cout << "fXPlusEpsilon" << endl;
+    // print();
 
     // f(X)
     layer0.perturbWeight( weightNum, -epsilon );
     apply( input );
-    const Matrix<float, batch_size, output_size>& fX = output();
+    Matrix<float, batch_size, output_size> fX = output();
 
-    cout << "input:" << endl << input.format( CleanFmt ) << endl;
+    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
 
-    cout << "fX" << endl;
-    print();
+    // cout << "fX" << endl;
+    // print();
     const Matrix<float, batch_size, output_size>& derivative = ( fXPlusEpsilon - fX ) / epsilon;
-    cout << endl << endl << endl;
-    return derivative.sum() / ( 1.0 * batch_size );
+    // cout << endl << endl << endl;
+    return derivative.sum() / batch_size;
   }
 
   const Matrix<float, batch_size, output_size>& output() const { return next.output(); }
@@ -116,24 +116,23 @@ public:
     layer0.perturbWeight( weightNum, epsilon );
     apply( input );
 
-    const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
-    cout << "input:" << endl << input.format( CleanFmt ) << endl;
+    // const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
 
-    const Matrix<float, batch_size, o0>& fXPlusEpsilon = output();
-    print();
-    cout << "fXPlusEpsilon" << fXPlusEpsilon.format( CleanFmt ) << endl;
+    Matrix<float, batch_size, o0> fXPlusEpsilon = output();
+    // print();
+    // cout << "fXPlusEpsilon" << fXPlusEpsilon.format( CleanFmt ) << endl;
 
     // f(X)
     layer0.perturbWeight( weightNum, -epsilon );
     apply( input );
 
-    cout << "input:" << endl << input.format( CleanFmt ) << endl;
+    // cout << "input:" << endl << input.format( CleanFmt ) << endl;
 
-    const Matrix<float, batch_size, o0>& fX = output();
-    print();
-    cout << "fXPlusEpsilon" << fXPlusEpsilon.format( CleanFmt ) << endl;
-    cout << "fX" << fX.format( CleanFmt ) << endl;
-    const Matrix<float, batch_size, o0>& derivative = ( fXPlusEpsilon - fX ) / epsilon;
+    Matrix<float, batch_size, o0> fX = output();
+    // print();
+    // cout << "fX" << fX.format( CleanFmt ) << endl;
+    Matrix<float, batch_size, o0> derivative = ( fXPlusEpsilon - fX ) / epsilon;
 
     return derivative.sum() / batch_size;
   }
