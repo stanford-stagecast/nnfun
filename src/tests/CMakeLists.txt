@@ -4,3 +4,4 @@ macro (add_test_exec exec_name)
 endmacro (add_test_exec)
 
 add_test_exec (eigentest1)
+add_test_exec (formulagradienttest1 ${Eigen_LDFLAGS} ${Eigen_LDFLAGS_OTHER})

@@ -14,7 +14,7 @@ private:
   Matrix<float, batch_size, output_size> unactivated_output_ {};
   Matrix<float, input_size, output_size> weights_ {};
   Matrix<float, 1, output_size> biases_ {};
-  Matrix<float, 1, output_size> deltas_ {};
+  Matrix<float, batch_size, output_size> deltas_ {};
   Matrix<float, input_size, output_size> grad_weights_ {};
   Matrix<float, 1, output_size> grad_biases_ {};
 
@@ -107,9 +107,9 @@ public:
     for ( unsigned int b = 0; b < batch_size; b++ ) {
       for ( unsigned int j = 0; j < output_size; j++ ) {
         for ( unsigned int i = 0; i < input_size; i++ ) {
-          grad_weights_( i, j ) += input( b, i ) * deltas_( 0, j ) / batch_size;
+          grad_weights_( i, j ) += input( b, i ) * deltas_( b, j );
         }
-        grad_biases_( 0, j ) += deltas_( 0, j ) / batch_size;
+        grad_biases_( 0, j ) += deltas_( b, j );
       }
     }
   }

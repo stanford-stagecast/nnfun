@@ -97,9 +97,9 @@ public:
     return layer0.getOutputSize();
   }
 
-  const Matrix<float, 1, i0> computeDeltas()
+  const Matrix<float, batch_size, i0> computeDeltas()
   {
-    Matrix<float, 1, o0> nextLayerDeltas = next.computeDeltas();
+    Matrix<float, batch_size, o0> nextLayerDeltas = next.computeDeltas();
     return layer0.computeDeltas( nextLayerDeltas );
   }
 
@@ -182,9 +182,9 @@ public:
     return layer0.getOutputSize();
   }
 
-  const Matrix<float, 1, i0> computeDeltas()
+  const Matrix<float, batch_size, i0> computeDeltas()
   {
-    Matrix<float, 1, o0> nextLayerDeltas = Matrix<float, 1, o0>::Ones();
+    Matrix<float, batch_size, o0> nextLayerDeltas = Matrix<float, batch_size, o0>::Ones() / batch_size;
     return layer0.computeDeltasLastLayer( nextLayerDeltas );
   }
 
