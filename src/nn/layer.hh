@@ -10,12 +10,20 @@ template<unsigned int batch_size, unsigned int input_size, unsigned int output_s
 class Layer
 {
 private:
+  // matrix to store outputs of neurons after activation sigma(W*X + B)
   Matrix<float, batch_size, output_size> output_ {};
+  // matrix to store outputs of neurons before activation W*X + B
   Matrix<float, batch_size, output_size> unactivated_output_ {};
+  // matrix to store weights of the connections  (W)*X + (B)
   Matrix<float, input_size, output_size> weights_ {};
+  // matrix to store biases of the layer W*X + (B)
   Matrix<float, 1, output_size> biases_ {};
+
+  // matrix to store errors at intermediate nodes for given input i.e. target activation - current activation
   Matrix<float, batch_size, output_size> deltas_ {};
+  // matrix to store gradients w.r.t. weights
   Matrix<float, input_size, output_size> grad_weights_ {};
+  // matrix to store gradients w.r.t. biases
   Matrix<float, 1, output_size> grad_biases_ {};
 
 public:
@@ -87,9 +95,10 @@ public:
   const Matrix<float, batch_size, input_size> computeDeltas(
     Matrix<float, batch_size, output_size> nextLayerDeltas )
   {
-    Matrix<float, batch_size, output_size> activated_outputs
+    // activated nodes is the matrix that stores 0/1 corresponding to whether the output node was activated
+    Matrix<float, batch_size, output_size> activated_nodes
       = ( unactivated_output_.array() > 0 ).template cast<float>().matrix();
-    deltas_ = nextLayerDeltas.cwiseProduct( activated_outputs );
+    deltas_ = nextLayerDeltas.cwiseProduct( activated_nodes );
     return deltas_ * weights_.transpose();
   }
 
