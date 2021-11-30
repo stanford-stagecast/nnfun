@@ -5,3 +5,4 @@ endmacro (add_test_exec)
 
 add_test_exec (eigentest1)
 add_test_exec (formulagradienttest1 ${Eigen_LDFLAGS} ${Eigen_LDFLAGS_OTHER})
+add_test_exec (formulagradienttest2 ${Eigen_LDFLAGS} ${Eigen_LDFLAGS_OTHER})

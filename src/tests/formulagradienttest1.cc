@@ -16,6 +16,7 @@ constexpr size_t batch_size = 1;
 constexpr size_t input_size = 32;
 constexpr float grad_epsilon = 1e-2;
 constexpr float compare_epsilon = 1e-5;
+constexpr float percentage_error_epsilon = 5 * 1e-2;
 
 void program_body()
 {
@@ -39,7 +40,9 @@ void program_body()
   nn->computeDeltas();
   nn->evaluateGradients( input );
 
-  float maxDiff = 0;
+  bool errorsOverThreshold = false;
+  float maxDiff = 0.0;
+  float maxPercentageError = 0.0;
   unsigned int numLayers = nn->getNumLayers();
   for ( unsigned int layerNum = 0; layerNum < numLayers; layerNum++ ) {
     unsigned int numParams = nn->getNumParams( layerNum );
@@ -48,10 +51,20 @@ void program_body()
       float formulaGradient = nn->getEvaluatedGradient( layerNum, paramNum );
       float numericalGradient = nn->calculateNumericalGradient( input, layerNum, paramNum, grad_epsilon );
       float diff = abs( formulaGradient - numericalGradient );
+      float percentageError = abs( diff / numericalGradient );
+      if ( ( diff > compare_epsilon ) and ( percentageError > percentage_error_epsilon ) ) {
+        errorsOverThreshold = true;
+        cout << "Error in Layer " << layerNum << ", Param " << paramNum << endl;
+        cout << formulaGradient << " " << numericalGradient << endl;
+      }
       maxDiff = max( diff, maxDiff );
+      maxPercentageError = max( percentageError, maxPercentageError );
     }
   }
-  if ( maxDiff > compare_epsilon ) {
+  cout << "Params: grad_epsilon " << grad_epsilon << ", compare_epsilon " << compare_epsilon
+       << ", percentage_error_epsilon " << percentage_error_epsilon << endl;
+  cout << "maxDiff: " << maxDiff << endl << "maxPercentageError: " << maxPercentageError << endl << endl;
+  if ( errorsOverThreshold ) {
     throw runtime_error( "test failure" );
   }
 }

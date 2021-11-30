@@ -13,7 +13,7 @@ using namespace std;
 using namespace Eigen;
 
 constexpr size_t batch_size = 1;
-constexpr size_t input_size = 3;
+constexpr size_t input_size = 4;
 
 void program_body( const unsigned int num_iterations, const float epsilon )
 {
@@ -26,7 +26,7 @@ void program_body( const unsigned int num_iterations, const float epsilon )
   srand( 0 );
 
   /* construct neural network on heap */
-  auto nn = make_unique<Network<batch_size, input_size, 4, 4, 2, 1>>();
+  auto nn = make_unique<Network<batch_size, input_size, 4, 64, 1>>();
   nn->initializeWeightsRandomly();
 
   srand( 10 );
