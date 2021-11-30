@@ -18,7 +18,7 @@ public:
     layer0.initializeWeightsRandomly();
     next.initializeWeightsRandomly();
   }
-  void apply( const Matrix<float, batch_size, i0>& input )
+  void apply( const Matrix<double, batch_size, i0>& input )
   {
     layer0.apply( input );
     next.apply( layer0.output() );
@@ -41,7 +41,7 @@ public:
     return layer0.getNumParams();
   }
 
-  float getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
+  double getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
   {
     if ( layerNum > 0 ) {
       return next.getEvaluatedGradient( layerNum - 1, paramNum );
@@ -51,10 +51,10 @@ public:
     return layer0.getEvaluatedGradient( paramNum );
   }
 
-  float calculateNumericalGradient( const Matrix<float, batch_size, i0>& input,
-                                    const unsigned int layerNum,
-                                    const unsigned int weightNum,
-                                    const float epsilon = 1e-8 )
+  double calculateNumericalGradient( const Matrix<double, batch_size, i0>& input,
+                                     const unsigned int layerNum,
+                                     const unsigned int weightNum,
+                                     const double epsilon = 1e-8 )
   {
     if ( layerNum > 0 ) {
       layer0.apply( input );
@@ -65,18 +65,19 @@ public:
     // f(X+epsilon)
     layer0.perturbWeight( weightNum, epsilon );
     apply( input );
-    Matrix<float, batch_size, output_size> fXPlusEpsilon = output();
+    Matrix<double, batch_size, output_size> fXPlusEpsilon = output();
 
     // f(X-epsilon)
     layer0.perturbWeight( weightNum, -2 * epsilon );
     apply( input );
-    Matrix<float, batch_size, output_size> fXMinusEpsilon = output();
+    Matrix<double, batch_size, output_size> fXMinusEpsilon = output();
 
     // f(X) restore network to original state
     layer0.perturbWeight( weightNum, epsilon );
     apply( input );
 
-    const Matrix<float, batch_size, output_size>& derivative = ( fXPlusEpsilon - fXMinusEpsilon ) / ( 2 * epsilon );
+    const Matrix<double, batch_size, output_size>& derivative
+      = ( fXPlusEpsilon - fXMinusEpsilon ) / ( 2 * epsilon );
     return derivative.sum() / batch_size;
   }
 
@@ -97,19 +98,19 @@ public:
     return layer0.getOutputSize();
   }
 
-  const Matrix<float, batch_size, i0> computeDeltas()
+  const Matrix<double, batch_size, i0> computeDeltas()
   {
-    Matrix<float, batch_size, o0> nextLayerDeltas = next.computeDeltas();
+    Matrix<double, batch_size, o0> nextLayerDeltas = next.computeDeltas();
     return layer0.computeDeltas( nextLayerDeltas );
   }
 
-  void evaluateGradients( const Matrix<float, batch_size, i0>& input )
+  void evaluateGradients( const Matrix<double, batch_size, i0>& input )
   {
     layer0.evaluateGradients( input );
     next.evaluateGradients( layer0.output() );
   }
 
-  const Matrix<float, batch_size, output_size>& output() const { return next.output(); }
+  const Matrix<double, batch_size, output_size>& output() const { return next.output(); }
 };
 
 // BASE CASE
@@ -123,7 +124,7 @@ public:
 
   void initializeWeightsRandomly() { layer0.initializeWeightsRandomly(); }
 
-  void apply( const Matrix<float, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
+  void apply( const Matrix<double, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
 
   void print( const unsigned int layerNum = 0 ) const { layer0.print( layerNum ); }
 
@@ -136,35 +137,36 @@ public:
     return layer0.getNumParams();
   }
 
-  float getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
+  double getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
   {
     assert( layerNum == 0 );
     (void)layerNum;
     return layer0.getEvaluatedGradient( paramNum );
   }
 
-  float calculateNumericalGradient( const Matrix<float, batch_size, i0>& input,
-                                    const unsigned int layerNum,
-                                    const unsigned int weightNum,
-                                    const float epsilon = 1e-8 )
+  double calculateNumericalGradient( const Matrix<double, batch_size, i0>& input,
+                                     const unsigned int layerNum,
+                                     const unsigned int weightNum,
+                                     const double epsilon = 1e-8 )
   {
     assert( layerNum == 0 );
     (void)layerNum;
     // f(X+epsilon)
     layer0.perturbWeight( weightNum, epsilon );
     apply( input );
-    Matrix<float, batch_size, output_size> fXPlusEpsilon = output();
+    Matrix<double, batch_size, output_size> fXPlusEpsilon = output();
 
     // f(X-epsilon)
     layer0.perturbWeight( weightNum, -2 * epsilon );
     apply( input );
-    Matrix<float, batch_size, output_size> fXMinusEpsilon = output();
+    Matrix<double, batch_size, output_size> fXMinusEpsilon = output();
 
     // f(X) restore network to original state
     layer0.perturbWeight( weightNum, epsilon );
     apply( input );
 
-    const Matrix<float, batch_size, output_size>& derivative = ( fXPlusEpsilon - fXMinusEpsilon ) / ( 2 * epsilon );
+    const Matrix<double, batch_size, output_size>& derivative
+      = ( fXPlusEpsilon - fXMinusEpsilon ) / ( 2 * epsilon );
     return derivative.sum() / batch_size;
   }
 
@@ -182,13 +184,13 @@ public:
     return layer0.getOutputSize();
   }
 
-  const Matrix<float, batch_size, i0> computeDeltas()
+  const Matrix<double, batch_size, i0> computeDeltas()
   {
-    Matrix<float, batch_size, o0> nextLayerDeltas = Matrix<float, batch_size, o0>::Ones() / batch_size;
+    Matrix<double, batch_size, o0> nextLayerDeltas = Matrix<double, batch_size, o0>::Ones() / batch_size;
     return layer0.computeDeltasLastLayer( nextLayerDeltas );
   }
 
-  void evaluateGradients( const Matrix<float, batch_size, i0>& input ) { layer0.evaluateGradients( input ); }
+  void evaluateGradients( const Matrix<double, batch_size, i0>& input ) { layer0.evaluateGradients( input ); }
 
-  const Matrix<float, batch_size, o0>& output() const { return layer0.output(); }
+  const Matrix<double, batch_size, o0>& output() const { return layer0.output(); }
 };

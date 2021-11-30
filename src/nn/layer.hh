@@ -11,37 +11,37 @@ class Layer
 {
 private:
   // matrix to store outputs of neurons after activation sigma(W*X + B)
-  Matrix<float, batch_size, output_size> output_ {};
+  Matrix<double, batch_size, output_size> output_ {};
   // matrix to store outputs of neurons before activation W*X + B
-  Matrix<float, batch_size, output_size> unactivated_output_ {};
+  Matrix<double, batch_size, output_size> unactivated_output_ {};
   // matrix to store weights of the connections  (W)*X + (B)
-  Matrix<float, input_size, output_size> weights_ {};
+  Matrix<double, input_size, output_size> weights_ {};
   // matrix to store biases of the layer W*X + (B)
-  Matrix<float, 1, output_size> biases_ {};
+  Matrix<double, 1, output_size> biases_ {};
 
   // matrix to store errors at intermediate nodes for given input i.e. target activation - current activation
-  Matrix<float, batch_size, output_size> deltas_ {};
+  Matrix<double, batch_size, output_size> deltas_ {};
   // matrix to store gradients w.r.t. weights
-  Matrix<float, input_size, output_size> grad_weights_ {};
+  Matrix<double, input_size, output_size> grad_weights_ {};
   // matrix to store gradients w.r.t. biases
-  Matrix<float, 1, output_size> grad_biases_ {};
+  Matrix<double, 1, output_size> grad_biases_ {};
 
 public:
   Layer() {}
 
   void initializeWeightsRandomly()
   {
-    weights_ = Matrix<float, input_size, output_size>::Random();
-    biases_ = Matrix<float, 1, output_size>::Random();
+    weights_ = Matrix<double, input_size, output_size>::Random();
+    biases_ = Matrix<double, 1, output_size>::Random();
   }
 
-  void apply( const Matrix<float, batch_size, input_size>& input )
+  void apply( const Matrix<double, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_ ).rowwise() + biases_;
     output_ = unactivated_output_.cwiseMax( 0 );
   }
 
-  void apply_without_activation( const Matrix<float, batch_size, input_size>& input )
+  void apply_without_activation( const Matrix<double, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_ ).rowwise() + biases_;
     output_ = unactivated_output_;
@@ -66,7 +66,7 @@ public:
     cout << "grad_biases:" << endl << grad_biases_.format( CleanFmt ) << endl << endl << endl;
   }
 
-  void perturbWeight( const unsigned int weight_num, const float epsilon )
+  void perturbWeight( const unsigned int weight_num, const double epsilon )
   {
     const unsigned int i = weight_num / output_size;
     const unsigned int j = weight_num % output_size;
@@ -81,7 +81,7 @@ public:
   unsigned int getInputSize() const { return input_size; }
   unsigned int getOutputSize() const { return output_size; }
 
-  float getEvaluatedGradient( const unsigned int paramNum )
+  double getEvaluatedGradient( const unsigned int paramNum )
   {
     const unsigned int i = paramNum / output_size;
     const unsigned int j = paramNum % output_size;
@@ -92,27 +92,27 @@ public:
     }
   }
 
-  const Matrix<float, batch_size, input_size> computeDeltas(
-    Matrix<float, batch_size, output_size> nextLayerDeltas )
+  const Matrix<double, batch_size, input_size> computeDeltas(
+    Matrix<double, batch_size, output_size> nextLayerDeltas )
   {
     // activated nodes is the matrix that stores 0/1 corresponding to whether the output node was activated
-    Matrix<float, batch_size, output_size> activated_nodes
-      = ( unactivated_output_.array() > 0 ).template cast<float>().matrix();
+    Matrix<double, batch_size, output_size> activated_nodes
+      = ( unactivated_output_.array() > 0 ).template cast<double>().matrix();
     deltas_ = nextLayerDeltas.cwiseProduct( activated_nodes );
     return deltas_ * weights_.transpose();
   }
 
-  const Matrix<float, batch_size, input_size> computeDeltasLastLayer(
-    Matrix<float, batch_size, output_size> nextLayerDeltas )
+  const Matrix<double, batch_size, input_size> computeDeltasLastLayer(
+    Matrix<double, batch_size, output_size> nextLayerDeltas )
   {
     deltas_ = nextLayerDeltas;
     return deltas_ * weights_.transpose();
   }
 
-  void evaluateGradients( const Matrix<float, batch_size, input_size>& input )
+  void evaluateGradients( const Matrix<double, batch_size, input_size>& input )
   {
-    grad_weights_ = Matrix<float, input_size, output_size>::Zero();
-    grad_biases_ = Matrix<float, 1, output_size>::Zero();
+    grad_weights_ = Matrix<double, input_size, output_size>::Zero();
+    grad_biases_ = Matrix<double, 1, output_size>::Zero();
     for ( unsigned int b = 0; b < batch_size; b++ ) {
       for ( unsigned int j = 0; j < output_size; j++ ) {
         for ( unsigned int i = 0; i < input_size; i++ ) {
@@ -123,7 +123,7 @@ public:
     }
   }
 
-  const Matrix<float, input_size, output_size>& weights() const { return weights_; }
-  const Matrix<float, batch_size, output_size>& output() const { return output_; }
-  const Matrix<float, 1, output_size>& biases() const { return biases_; }
+  const Matrix<double, input_size, output_size>& weights() const { return weights_; }
+  const Matrix<double, batch_size, output_size>& output() const { return output_; }
+  const Matrix<double, 1, output_size>& biases() const { return biases_; }
 };

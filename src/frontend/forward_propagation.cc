@@ -30,9 +30,9 @@ void program_body( const unsigned int num_iterations )
   nn->initializeWeightsRandomly();
 
   /* initialize inputs */
-  vector<Matrix<float, batch_size, input_size>> inputs;
+  vector<Matrix<double, batch_size, input_size>> inputs;
   for ( unsigned int i = 0; i < num_iterations; i++ ) {
-    inputs.emplace_back( Matrix<float, batch_size, input_size>::Random() );
+    inputs.emplace_back( Matrix<double, batch_size, input_size>::Random() );
   }
 
   /* run benchmark */
@@ -48,7 +48,7 @@ void program_body( const unsigned int num_iterations )
   const uint64_t end = Timer::timestamp_ns();
 
   cout << "Average runtime (over " << num_iterations << " iterations, batch size=" << batch_size << "): ";
-  Timer::pp_ns( cout, ( end - start ) / float( num_iterations ) );
+  Timer::pp_ns( cout, ( end - start ) / double( num_iterations ) );
   cout << " per iteration\n";
 }
 

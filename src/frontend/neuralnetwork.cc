@@ -18,24 +18,24 @@ class NeuralNetwork
   vector<ColVector*> deltas;       // stores the error contribution of each neurons
   vector<MatrixXf*> weights;       // the weights of connections between layers
   vector<uint> topology;
-  float learningRate;
+  double learningRate;
   // enum { NeedsToAlign = (sizeof(neuronLayers)%16)==0 };
 
 public:
   // EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign)
 
-  NeuralNetwork( vector<uint> topology, float learningRate = 0.005f );
+  NeuralNetwork( vector<uint> topology, double learningRate = 0.005f );
 
   ColVector forward_propagation( ColVector& input );
   void backward_propagation( ColVector& output );
   void error_calculation( ColVector& output );
   void update_weights();
 
-  float activationFunction( float x ) { return max( x, 0.0f ); }
+  double activationFunction( double x ) { return max( x, 0.0f ); }
 
   ColVector activationFunction( ColVector& x ) { return x.cwiseMax( 0 ); }
 
-  float activationFunctionDerivative( float x )
+  double activationFunctionDerivative( double x )
   {
     if ( x >= 0 )
       return 1;
@@ -57,7 +57,7 @@ public:
   }
 };
 
-NeuralNetwork::NeuralNetwork( vector<uint> topology_, float learningRate_ )
+NeuralNetwork::NeuralNetwork( vector<uint> topology_, double learningRate_ )
   : neuronLayers()
   , cacheLayers()
   , deltas()

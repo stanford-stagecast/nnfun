@@ -13,10 +13,10 @@ using namespace std;
 using namespace Eigen;
 
 constexpr size_t batch_size = 1;
-constexpr size_t input_size = 32;
-constexpr float grad_epsilon = 1e-2;
-constexpr float compare_epsilon = 1e-5;
-constexpr float percentage_error_epsilon = 5 * 1e-2;
+constexpr size_t input_size = 64;
+constexpr double grad_epsilon = 1e-5;
+constexpr double compare_epsilon = 1e-5;
+constexpr double percentage_error_epsilon = 1e-3;
 
 void program_body()
 {
@@ -29,29 +29,29 @@ void program_body()
   srand( 0 );
 
   /* construct neural network on heap */
-  auto nn = make_unique<Network<batch_size, input_size, 32, 16, 8, 1, 4, 8, 1>>();
+  auto nn = make_unique<Network<batch_size, input_size, 32, 16, 8, 1, 8, 16, 32, 1>>();
   nn->initializeWeightsRandomly();
 
   srand( 10 );
   /* initialize inputs */
-  Matrix<float, batch_size, input_size> input = Matrix<float, batch_size, input_size>::Random();
+  Matrix<double, batch_size, input_size> input = Matrix<double, batch_size, input_size>::Random();
 
   nn->apply( input );
   nn->computeDeltas();
   nn->evaluateGradients( input );
 
   bool errorsOverThreshold = false;
-  float maxDiff = 0.0;
-  float maxPercentageError = 0.0;
+  double maxDiff = 0.0;
+  double maxPercentageError = 0.0;
   unsigned int numLayers = nn->getNumLayers();
   for ( unsigned int layerNum = 0; layerNum < numLayers; layerNum++ ) {
     unsigned int numParams = nn->getNumParams( layerNum );
-    vector<float> gradients( numParams, 0 );
+    vector<double> gradients( numParams, 0 );
     for ( unsigned int paramNum = 0; paramNum < numParams; paramNum++ ) {
-      float formulaGradient = nn->getEvaluatedGradient( layerNum, paramNum );
-      float numericalGradient = nn->calculateNumericalGradient( input, layerNum, paramNum, grad_epsilon );
-      float diff = abs( formulaGradient - numericalGradient );
-      float percentageError = abs( diff / numericalGradient );
+      double formulaGradient = nn->getEvaluatedGradient( layerNum, paramNum );
+      double numericalGradient = nn->calculateNumericalGradient( input, layerNum, paramNum, grad_epsilon );
+      double diff = abs( formulaGradient - numericalGradient );
+      double percentageError = abs( diff / numericalGradient );
       if ( ( diff > compare_epsilon ) and ( percentageError > percentage_error_epsilon ) ) {
         errorsOverThreshold = true;
         cout << "Error in Layer " << layerNum << ", Param " << paramNum << endl;
@@ -71,15 +71,15 @@ void program_body()
 
 // void program_body()
 // {
-//   Matrix<float, 2, 1> input;
+//   Matrix<double, 2, 1> input;
 //   input << 9, 2;
 
-//   Matrix<float, 3, 2> layer1;
+//   Matrix<double, 3, 2> layer1;
 //   layer1 << 1, 2, 3, 4, 5, 6;
 
 //   auto output = layer1 * input;
 
-//   Matrix<float, 3, 1> expected_output;
+//   Matrix<double, 3, 1> expected_output;
 //   expected_output << 13, 35, 57;
 
 //   if ( output != expected_output ) {

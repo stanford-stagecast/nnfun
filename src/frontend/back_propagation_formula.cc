@@ -31,7 +31,7 @@ void program_body()
 
   srand( 10 );
   /* initialize inputs */
-  Matrix<float, batch_size, input_size> input = Matrix<float, batch_size, input_size>::Random();
+  Matrix<double, batch_size, input_size> input = Matrix<double, batch_size, input_size>::Random();
 
   nn->apply( input );
   const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
@@ -51,10 +51,10 @@ void program_body()
          << endl;
 
     unsigned int numParams = nn->getNumParams( layerNum );
-    vector<float> gradients( numParams, 0 );
+    vector<double> gradients( numParams, 0 );
 
     for ( unsigned int paramNum = 0; paramNum < numParams; paramNum++ ) {
-      float gradient = nn->getEvaluatedGradient( layerNum, paramNum );
+      double gradient = nn->getEvaluatedGradient( layerNum, paramNum );
       gradients[paramNum] = gradient;
     }
 
