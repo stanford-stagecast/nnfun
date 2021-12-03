@@ -12,8 +12,8 @@
 using namespace std;
 using namespace Eigen;
 
-constexpr size_t batch_size = 3;
-constexpr size_t input_size = 1;
+constexpr size_t batch_size = 1;
+constexpr size_t input_size = 1024;
 
 void program_body( const unsigned int num_iterations )
 {
@@ -25,7 +25,7 @@ void program_body( const unsigned int num_iterations )
   srand( Timer::timestamp_ns() );
 
   /* construct neural network on heap */
-  auto nn = make_unique<Network<float, batch_size, input_size, 1024, 1024, 1024, 1024, 1024, 1024, 1>>();
+  auto nn = make_unique<Network<float, batch_size, input_size, 4096, 1>>();
   // auto nn = make_unique<Network<batch_size, input_size, 5, 3, 2, 1>>();
   nn->initializeWeightsRandomly();
 
@@ -39,11 +39,9 @@ void program_body( const unsigned int num_iterations )
   const uint64_t start = Timer::timestamp_ns();
   for ( unsigned int i = 0; i < num_iterations; i++ ) {
     nn->apply( inputs[i] );
+    nn->computeDeltas();
+    nn->evaluateGradients( inputs[i] );
   }
-
-  // const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
-  // cout << "input:" << endl << inputs[num_iterations-1].format( CleanFmt ) << endl << endl;
-  // nn->print();
 
   const uint64_t end = Timer::timestamp_ns();
 

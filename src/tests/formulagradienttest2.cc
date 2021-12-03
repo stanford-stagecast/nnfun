@@ -29,7 +29,7 @@ void program_body()
   srand( 0 );
 
   /* construct neural network on heap */
-  auto nn = make_unique<Network<batch_size, input_size, 64, 64, 64, 64, 64, 64, 64, 64, 1>>();
+  auto nn = make_unique<Network<double, batch_size, input_size, 64, 64, 64, 64, 64, 64, 64, 64, 1>>();
   nn->initializeWeightsRandomly();
 
   srand( 10 );

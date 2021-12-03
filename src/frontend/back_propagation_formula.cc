@@ -26,12 +26,12 @@ void program_body()
   srand( 0 );
 
   /* construct neural network on heap */
-  auto nn = make_unique<Network<batch_size, input_size, 4, 4, 2, 1>>();
+  auto nn = make_unique<Network<float, batch_size, input_size, 4, 4, 2, 1>>();
   nn->initializeWeightsRandomly();
 
   srand( 10 );
   /* initialize inputs */
-  Matrix<double, batch_size, input_size> input = Matrix<double, batch_size, input_size>::Random();
+  Matrix<float, batch_size, input_size> input = Matrix<float, batch_size, input_size>::Random();
 
   nn->apply( input );
   const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
@@ -51,10 +51,10 @@ void program_body()
          << endl;
 
     unsigned int numParams = nn->getNumParams( layerNum );
-    vector<double> gradients( numParams, 0 );
+    vector<float> gradients( numParams, 0 );
 
     for ( unsigned int paramNum = 0; paramNum < numParams; paramNum++ ) {
-      double gradient = nn->getEvaluatedGradient( layerNum, paramNum );
+      float gradient = nn->getEvaluatedGradient( layerNum, paramNum );
       gradients[paramNum] = gradient;
     }
 
