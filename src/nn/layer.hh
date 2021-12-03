@@ -113,12 +113,15 @@ public:
     grad_weights_ = Matrix<T, input_size, output_size>::Zero();
     grad_biases_ = Matrix<T, 1, output_size>::Zero();
     for ( unsigned int b = 0; b < batch_size; b++ ) {
-      for ( unsigned int j = 0; j < output_size; j++ ) {
-        for ( unsigned int i = 0; i < input_size; i++ ) {
-          grad_weights_( i, j ) += input( b, i ) * deltas_( b, j );
-        }
-        grad_biases_( 0, j ) += deltas_( b, j );
-      }
+      // for ( unsigned int j = 0; j < output_size; j++ ) {
+      //   // for ( unsigned int i = 0; i < input_size; i++ ) {
+      //   //   grad_weights_( i, j ) += input( b, i ) * deltas_( b, j );
+      //   // }
+      //   grad_weights_.col( j ) += input.row( b ) * deltas_( b, j );
+      // }
+      grad_weights_.noalias() += input.row( b ).transpose() * deltas_.row( b );
+      grad_biases_.noalias() += deltas_.row( b );
+      // noalias is an eigen optimisation - otherwise becomes slower than for loops
     }
   }
 
