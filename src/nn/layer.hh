@@ -111,7 +111,7 @@ public:
   void evaluateGradients( const Matrix<T, batch_size, input_size>& input )
   {
     grad_weights_ = Matrix<T, input_size, output_size>::Zero();
-    grad_biases_ = Matrix<T, 1, output_size>::Zero();
+    // grad_biases_ = Matrix<T, 1, output_size>::Zero();
     for ( unsigned int b = 0; b < batch_size; b++ ) {
       // for ( unsigned int j = 0; j < output_size; j++ ) {
       //   // for ( unsigned int i = 0; i < input_size; i++ ) {
@@ -120,9 +120,10 @@ public:
       //   grad_weights_.col( j ) += input.row( b ) * deltas_( b, j );
       // }
       grad_weights_.noalias() += input.row( b ).transpose() * deltas_.row( b );
-      grad_biases_.noalias() += deltas_.row( b );
+      // grad_biases_.noalias() += deltas_.row( b );
       // noalias is an eigen optimisation - otherwise becomes slower than for loops
     }
+    grad_biases_ = deltas_.colwise().sum();
   }
 
   const Matrix<T, input_size, output_size>& weights() const { return weights_; }

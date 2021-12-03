@@ -12,7 +12,7 @@
 using namespace std;
 using namespace Eigen;
 
-constexpr size_t batch_size = 1;
+constexpr size_t batch_size = 3;
 constexpr size_t input_size = 64;
 // epsilon for computation of numerical gradients
 constexpr double grad_epsilon = 1e-5;

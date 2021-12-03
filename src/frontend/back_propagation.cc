@@ -25,8 +25,10 @@ void program_body( const unsigned int num_iterations )
   srand( Timer::timestamp_ns() );
 
   /* construct neural network on heap */
-  auto nn = make_unique<Network<float, batch_size, input_size, 4096, 1>>();
-  // auto nn = make_unique<Network<batch_size, input_size, 5, 3, 2, 1>>();
+  // auto nn = make_unique<Network<float, batch_size, input_size, 4096, 1>>();
+  // auto nn = make_unique<Network<float, batch_size, input_size, 2048, 2048, 1>>();
+  // auto nn = make_unique<Network<float, batch_size, input_size, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1>>();
+  auto nn = make_unique<Network<float, batch_size, input_size, 5, 3, 2, 1>>();
   nn->initializeWeightsRandomly();
 
   /* initialize inputs */
@@ -49,6 +51,7 @@ void program_body( const unsigned int num_iterations )
 
   cout << "Average runtime (over " << num_iterations << " iterations, batch size=" << batch_size << "): ";
   Timer::pp_ns( cout, ( end - start ) / float( num_iterations ) );
+  // cout << endl << ( end - start ) / ( 1e3 * float( num_iterations ) ) << " us" << endl;
   cout << " per iteration\n";
 }
 
