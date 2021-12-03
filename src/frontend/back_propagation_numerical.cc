@@ -33,7 +33,10 @@ void program_body( const unsigned int num_iterations, const float epsilon )
   /* initialize inputs */
   Matrix<float, batch_size, input_size> input = Matrix<float, batch_size, input_size>::Random();
 
+  /* forward prop */
   nn->apply( input );
+
+  /* print */
   const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
   cout << "input:" << endl << input.format( CleanFmt ) << endl << endl;
   nn->print();
@@ -54,6 +57,7 @@ void program_body( const unsigned int num_iterations, const float epsilon )
     unsigned int numParams = nn->getNumParams( layerNum );
     vector<float> gradients( numParams, 0 );
 
+    /* numerical gradient computation */
     for ( unsigned int paramNum = 0; paramNum < numParams; paramNum++ ) {
       float gradient = nn->calculateNumericalGradient( input, layerNum, paramNum, epsilon );
       gradients[paramNum] = gradient;

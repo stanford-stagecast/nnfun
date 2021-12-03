@@ -14,7 +14,9 @@ using namespace Eigen;
 
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 64;
+// max allowable absolute difference in numerical and backprop gradients
 constexpr double compare_epsilon = 1e-3;
+// max allowable percentage difference in numerical and backprop gradients
 constexpr double percentage_error_epsilon = 1e-3;
 
 void program_body( const double epsilon )
@@ -35,11 +37,14 @@ void program_body( const double epsilon )
   /* initialize inputs */
   Matrix<double, batch_size, input_size> input = Matrix<double, batch_size, input_size>::Random();
 
+  /* forward prop */
   nn->apply( input );
-  const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+
+  /* back prop */
   nn->computeDeltas();
   nn->evaluateGradients( input );
 
+  /* compare back prop results with numerical gradients */
   double maxDiff = 0;
   double maxPercentageError = 0.0;
   bool errorsOverThreshold = false;

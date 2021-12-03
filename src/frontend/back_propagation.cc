@@ -38,7 +38,9 @@ void program_body( const unsigned int num_iterations )
   /* run benchmark */
   const uint64_t start = Timer::timestamp_ns();
   for ( unsigned int i = 0; i < num_iterations; i++ ) {
+    /* forward prop */
     nn->apply( inputs[i] );
+    /* back prop*/
     nn->computeDeltas();
     nn->evaluateGradients( inputs[i] );
   }

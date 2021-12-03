@@ -33,10 +33,15 @@ void program_body()
   /* initialize inputs */
   Matrix<float, batch_size, input_size> input = Matrix<float, batch_size, input_size>::Random();
 
+  /* forward prop */
   nn->apply( input );
-  const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+
+  /* back prop */
   nn->computeDeltas();
   nn->evaluateGradients( input );
+
+  /* print */
+  const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
   cout << "input:" << endl << input.format( CleanFmt ) << endl << endl;
   nn->print();
 

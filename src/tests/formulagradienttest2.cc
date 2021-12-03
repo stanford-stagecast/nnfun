@@ -14,10 +14,12 @@ using namespace Eigen;
 
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 64;
+// epsilon for computation of numerical gradients
 constexpr double grad_epsilon = 1e-5;
+// max allowable absolute difference in numerical and backprop gradients
 constexpr double compare_epsilon = 1e-5;
+// max allowable percentage difference in numerical and backprop gradients
 constexpr double percentage_error_epsilon = 1e-3;
-
 void program_body()
 {
   /* remove limit on stack size */
@@ -36,10 +38,14 @@ void program_body()
   /* initialize inputs */
   Matrix<double, batch_size, input_size> input = Matrix<double, batch_size, input_size>::Random();
 
+  /* forward prop */
   nn->apply( input );
+
+  /* back prop */
   nn->computeDeltas();
   nn->evaluateGradients( input );
 
+  /* compare back prop results with numerical gradients */
   bool errorsOverThreshold = false;
   double maxDiff = 0.0;
   double maxPercentageError = 0.0;
@@ -59,7 +65,6 @@ void program_body()
         cout << "Error in Layer " << layerNum << ", Param " << paramNum << endl;
         cout << formulaGradient << " " << numericalGradient << endl;
         cout << "diff: " << diff << ", %diff: " << percentageError << endl;
-        // cout << "maxDiff: " << maxDiff << ", maxPercentageError: " << maxPercentageError << endl;
         cout << endl;
       }
     }
