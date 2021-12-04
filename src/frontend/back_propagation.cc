@@ -27,8 +27,8 @@ void program_body( const unsigned int num_iterations )
   /* construct neural network on heap */
   // auto nn = make_unique<Network<float, batch_size, input_size, 4096, 1>>();
   // auto nn = make_unique<Network<float, batch_size, input_size, 2048, 2048, 1>>();
-  // auto nn = make_unique<Network<float, batch_size, input_size, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1>>();
-  auto nn = make_unique<Network<float, batch_size, input_size, 5, 3, 2, 1>>();
+  auto nn = make_unique<Network<float, batch_size, input_size, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1>>();
+  // auto nn = make_unique<Network<float, batch_size, input_size, 5, 3, 2, 1>>();
   nn->initializeWeightsRandomly();
 
   /* initialize inputs */
@@ -37,8 +37,16 @@ void program_body( const unsigned int num_iterations )
     inputs.emplace_back( Matrix<float, batch_size, input_size>::Random() );
   }
 
-  /* run benchmark */
-  const uint64_t start = Timer::timestamp_ns();
+  /* run forward prop benchmark */
+  const uint64_t f_start = Timer::timestamp_ns();
+  for ( unsigned int i = 0; i < num_iterations; i++ ) {
+    /* forward prop */
+    nn->apply( inputs[i] );
+  }
+  const uint64_t f_end = Timer::timestamp_ns();
+
+  /* run backprop benchmark */
+  const uint64_t b_start = Timer::timestamp_ns();
   for ( unsigned int i = 0; i < num_iterations; i++ ) {
     /* forward prop */
     nn->apply( inputs[i] );
@@ -47,12 +55,14 @@ void program_body( const unsigned int num_iterations )
     nn->evaluateGradients( inputs[i] );
   }
 
-  const uint64_t end = Timer::timestamp_ns();
+  const uint64_t b_end = Timer::timestamp_ns();
 
-  cout << "Average runtime (over " << num_iterations << " iterations, batch size=" << batch_size << "): ";
-  Timer::pp_ns( cout, ( end - start ) / float( num_iterations ) );
-  // cout << endl << ( end - start ) / ( 1e3 * float( num_iterations ) ) << " us" << endl;
+  cout << "Average back propagation time (over " << num_iterations << " iterations, batch size=" << batch_size
+       << "): ";
+  Timer::pp_ns( cout, ( ( b_end - b_start ) - ( f_end - f_start ) ) / float( num_iterations ) );
   cout << " per iteration\n";
+  cout << "Back Propagation time / forward propagation time: "
+       << ( ( b_end - b_start ) * 1.0 / ( f_end - f_start ) - 1 ) << " x\n";
 }
 
 int main( int argc, char* argv[] )

@@ -53,7 +53,6 @@ void program_body()
   unsigned int numLayers = nn->getNumLayers();
   for ( unsigned int layerNum = 0; layerNum < numLayers; layerNum++ ) {
     unsigned int numParams = nn->getNumParams( layerNum );
-    vector<double> gradients( numParams, 0 );
     for ( unsigned int paramNum = 0; paramNum < numParams; paramNum++ ) {
       double formulaGradient = nn->getEvaluatedGradient( layerNum, paramNum );
       double numericalGradient = nn->calculateNumericalGradient( input, layerNum, paramNum, grad_epsilon );

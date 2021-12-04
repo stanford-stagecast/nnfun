@@ -76,7 +76,7 @@ void program_body( const double epsilon )
        << ", percentage_error_epsilon " << percentage_error_epsilon << endl;
   cout << "maxDiff: " << maxDiff << endl << "maxPercentageError: " << maxPercentageError << endl << endl;
   if ( errorsOverThreshold ) {
-    cout << "test failure";
+    cout << "test failure" << endl;
   }
 }
 

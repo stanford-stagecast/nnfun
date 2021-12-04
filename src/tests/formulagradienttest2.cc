@@ -20,6 +20,7 @@ constexpr double grad_epsilon = 1e-5;
 constexpr double compare_epsilon = 1e-5;
 // max allowable percentage difference in numerical and backprop gradients
 constexpr double percentage_error_epsilon = 1e-3;
+
 void program_body()
 {
   /* remove limit on stack size */
@@ -52,7 +53,6 @@ void program_body()
   unsigned int numLayers = nn->getNumLayers();
   for ( unsigned int layerNum = 0; layerNum < numLayers; layerNum++ ) {
     unsigned int numParams = nn->getNumParams( layerNum );
-    vector<double> gradients( numParams, 0 );
     for ( unsigned int paramNum = 0; paramNum < numParams; paramNum++ ) {
       double formulaGradient = nn->getEvaluatedGradient( layerNum, paramNum );
       double numericalGradient = nn->calculateNumericalGradient( input, layerNum, paramNum, grad_epsilon );
