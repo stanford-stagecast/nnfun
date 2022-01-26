@@ -129,4 +129,8 @@ public:
   const Matrix<T, input_size, output_size>& weights() const { return weights_; }
   const Matrix<T, batch_size, output_size>& output() const { return output_; }
   const Matrix<T, 1, output_size>& biases() const { return biases_; }
+
+  // accessors for mutable access to weights and biases
+  Matrix<T, input_size, output_size>& weights() { return weights_; }
+  Matrix<T, 1, output_size>& biases() { return biases_; }
 };
