@@ -35,6 +35,12 @@ void program_body()
   nn->apply( input );
 
   cout << "output: " << nn->output() << "\n";
+
+  nn->computeDeltas();
+  nn->evaluateGradients( input );
+
+  cout << "partial derivative of output wrt weight = " << nn->getEvaluatedGradient( 0, 0 ) << "\n";
+  cout << "partial derivative of output wrt bias = " << nn->getEvaluatedGradient( 0, 1 ) << "\n";
 }
 
 int main( int argc, char*[] )
