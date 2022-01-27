@@ -32,15 +32,33 @@ void program_body()
   Matrix<float, 1, 1> input {};
   input( 0 ) = 2;
 
-  nn->apply( input );
+  while ( true ) {
+    nn->apply( input );
 
-  cout << "output: " << nn->output() << "\n";
+    cout << "output: " << nn->output() << "\n";
 
-  nn->computeDeltas();
-  nn->evaluateGradients( input );
+    const float loss = ( 100 - nn->output()( 0 ) ) * ( 100 - nn->output()( 0 ) );
 
-  cout << "partial derivative of output wrt weight = " << nn->getEvaluatedGradient( 0, 0 ) << "\n";
-  cout << "partial derivative of output wrt bias = " << nn->getEvaluatedGradient( 0, 1 ) << "\n";
+    nn->computeDeltas();
+    nn->evaluateGradients( input );
+
+    const float pd_loss_output = -2 * ( 100 - nn->output()( 0 ) );
+
+    cout << "partial derivative of output wrt weight = " << nn->getEvaluatedGradient( 0, 0 ) << "\n";
+    cout << "partial derivative of output wrt bias = " << nn->getEvaluatedGradient( 0, 1 ) << "\n";
+
+    cout << "loss: " << loss << "\n";
+
+    cout << "partial derivative of loss wrt output = " << pd_loss_output << "\n";
+
+    cout << "partial derivative of loss wrt weight = " << pd_loss_output * nn->getEvaluatedGradient( 0, 0 ) << "\n";
+    cout << "partial derivative of loss wrt bias = " << pd_loss_output * nn->getEvaluatedGradient( 0, 1 ) << "\n";
+
+    const float learning_rate = .0001;
+
+    nn->layer0.weights()( 0 ) *= ( 1 - learning_rate * pd_loss_output * nn->getEvaluatedGradient( 0, 0 ) );
+    nn->layer0.biases()( 0 ) *= ( 1 - learning_rate * pd_loss_output * nn->getEvaluatedGradient( 0, 1 ) );
+  }
 }
 
 int main( int argc, char*[] )
