@@ -16,18 +16,22 @@ using namespace Eigen;
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 1;
 
-vector<Matrix<float, batch_size, input_size>> input {};
-vector<Matrix<float, batch_size, input_size>> output {};
-
-float getLoss( float expect, float nnOutput )
+/* use squared error as loss function */
+float loss_function( const float actual, const float expected )
 {
-  return ( expect - nnOutput ) * ( expect - nnOutput );
+  return ( actual - expected ) * ( actual - expected );
 }
 
-float get_pd_loss_output( float expect, float nnOutput )
+/* partial derivative of loss with respect to neural network output */
+float pd_loss_wrt_output( const float loss, const float nnOutput )
 {
-  cout << "inside: " << expect << " " << nnOutput << endl;
-  return -2 * ( expect - nnOutput );
+  return -2 * ( loss - nnOutput );
+}
+
+/* actual function we want the neural network to learn */
+float true_function( const float input )
+{
+  return 3 * input + 1;
 }
 
 void program_body()
@@ -44,6 +48,24 @@ void program_body()
   nn->layer0.weights()( 0 ) = 1;
   nn->layer0.biases()( 0 ) = 1;
 
+  double x_value = 0;
+  while ( true ) {
+    /* step 1: construct a unique problem instance */
+    Matrix<float, batch_size, input_size> input, output;
+
+    input( 0, 0 ) = x_value;
+    output( 0, 0 ) = true_function( x_value );
+
+    x_value++; /* use a different problem instance next time */
+
+    cout << "problem instance: " << input( 0, 0 ) << " => " << output( 0, 0 ) << "\n";
+
+    /* step 2: forward propagate and calculate loss function */
+
+    /* step 3: backpropagate error */
+  }
+
+#if 0
   /* input and output */
   for ( int i = 0; i < 10; i++ ) {
     Matrix<float, batch_size, input_size> in, out;
@@ -101,6 +123,7 @@ void program_body()
     auto nnOutput = nn->output();
     cout << "nn output: " << nnOutput << endl;
   }
+#endif
 }
 
 int main( int argc, char*[] )
