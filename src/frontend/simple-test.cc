@@ -61,6 +61,9 @@ void program_body()
     cout << "problem instance: " << input( 0, 0 ) << " => " << output( 0, 0 ) << "\n";
 
     /* step 2: forward propagate and calculate loss function */
+    nn->apply( input );
+
+    cout << "NN maps " << input( 0, 0 ) << " => " << nn->output()( 0, 0 ) << "\n";
 
     /* step 3: backpropagate error */
   }
