@@ -51,19 +51,22 @@ void program_body()
   double x_value = 0;
   while ( true ) {
     /* step 1: construct a unique problem instance */
-    Matrix<float, batch_size, input_size> input, output;
+    Matrix<float, batch_size, input_size> input, ground_truth_output;
 
     input( 0, 0 ) = x_value;
-    output( 0, 0 ) = true_function( x_value );
+    ground_truth_output( 0, 0 ) = true_function( x_value );
 
     x_value++; /* use a different problem instance next time */
 
-    cout << "problem instance: " << input( 0, 0 ) << " => " << output( 0, 0 ) << "\n";
+    cout << "problem instance: " << input( 0, 0 ) << " => " << ground_truth_output( 0, 0 ) << "\n";
 
     /* step 2: forward propagate and calculate loss function */
     nn->apply( input );
 
     cout << "NN maps " << input( 0, 0 ) << " => " << nn->output()( 0, 0 ) << "\n";
+
+    cout << "loss when " << ground_truth_output( 0, 0 ) << " desired, " << nn->output()( 0, 0 )
+         << " produced = " << loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) ) << "\n";
 
     /* step 3: backpropagate error */
   }
