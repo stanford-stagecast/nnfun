@@ -23,9 +23,9 @@ float loss_function( const float actual, const float expected )
 }
 
 /* partial derivative of loss with respect to neural network output */
-float pd_loss_wrt_output( const float loss, const float nnOutput )
+float compute_pd_loss_wrt_output( const float loss )
 {
-  return -2 * ( loss - nnOutput );
+  return -2 * sqrt( loss );
 }
 
 /* actual function we want the neural network to learn */
@@ -33,6 +33,8 @@ float true_function( const float input )
 {
   return 3 * input + 1;
 }
+
+constexpr float learning_rate = 0.001;
 
 void program_body()
 {
@@ -65,10 +67,22 @@ void program_body()
 
     cout << "NN maps " << input( 0, 0 ) << " => " << nn->output()( 0, 0 ) << "\n";
 
+    const float loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+
     cout << "loss when " << ground_truth_output( 0, 0 ) << " desired, " << nn->output()( 0, 0 )
          << " produced = " << loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) ) << "\n";
 
     /* step 3: backpropagate error */
+    nn->computeDeltas();
+    nn->evaluateGradients( input );
+
+    const float pd_loss_wrt_output = compute_pd_loss_wrt_output( loss );
+
+    /* perturb weight */
+    nn->layer0.weights()( 0 ) *= ( 1 - learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 ) );
+    nn->layer0.biases()( 0 ) *= ( 1 - learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 ) );
+
+    cerr << "\n";
   }
 
 #if 0
