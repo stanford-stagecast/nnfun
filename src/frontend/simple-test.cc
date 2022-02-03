@@ -17,15 +17,15 @@ constexpr size_t batch_size = 1;
 constexpr size_t input_size = 1;
 
 /* use squared error as loss function */
-float loss_function( const float actual, const float expected )
+float loss_function( const float target, const float actual )
 {
-  return ( actual - expected ) * ( actual - expected );
+  return ( target - actual ) * ( target - actual );
 }
 
 /* partial derivative of loss with respect to neural network output */
-float compute_pd_loss_wrt_output( const float loss )
+float compute_pd_loss_wrt_output( const float target, const float actual )
 {
-  return -2 * sqrt( loss );
+  return -2 * ( target - actual );
 }
 
 /* actual function we want the neural network to learn */
@@ -52,6 +52,8 @@ void program_body()
 
   double x_value = 0;
   while ( true ) {
+    cout << "Weight = " << nn->layer0.weights()( 0 ) << ", bias = " << nn->layer0.biases()( 0 ) << "\n";
+
     /* step 1: construct a unique problem instance */
     Matrix<float, batch_size, input_size> input, ground_truth_output;
 
@@ -67,8 +69,6 @@ void program_body()
 
     cout << "NN maps " << input( 0, 0 ) << " => " << nn->output()( 0, 0 ) << "\n";
 
-    const float loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
-
     cout << "loss when " << ground_truth_output( 0, 0 ) << " desired, " << nn->output()( 0, 0 )
          << " produced = " << loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) ) << "\n";
 
@@ -76,13 +76,25 @@ void program_body()
     nn->computeDeltas();
     nn->evaluateGradients( input );
 
-    const float pd_loss_wrt_output = compute_pd_loss_wrt_output( loss );
+    const float pd_loss_wrt_output
+      = compute_pd_loss_wrt_output( ground_truth_output( 0, 0 ), nn->output()( 0, 0 ) );
 
     /* perturb weight */
     nn->layer0.weights()( 0 ) *= ( 1 - learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 ) );
     nn->layer0.biases()( 0 ) *= ( 1 - learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 ) );
 
-    cerr << "\n";
+    cout << "\n";
+
+    cout << "pd_loss_wrt_output = " << pd_loss_wrt_output << "\n";
+    cout << "pd_output_wrt_weight = " << nn->getEvaluatedGradient( 0, 0 ) << "\n";
+    cout << "pd_output_wrt_bias = " << nn->getEvaluatedGradient( 0, 1 ) << "\n";
+
+    cout << "\n";
+
+    cout << "perturb weight: " << -pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 ) << "\n";
+    cout << "perturb bias: " << -pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 ) << "\n";
+
+    cout << "\n";
   }
 
 #if 0
