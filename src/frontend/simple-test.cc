@@ -80,8 +80,8 @@ void program_body()
       = compute_pd_loss_wrt_output( ground_truth_output( 0, 0 ), nn->output()( 0, 0 ) );
 
     /* perturb weight */
-    nn->layer0.weights()( 0 ) *= ( 1 - learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 ) );
-    nn->layer0.biases()( 0 ) *= ( 1 - learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 ) );
+    nn->layer0.weights()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
+    nn->layer0.biases()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
 
     cout << "\n";
 
