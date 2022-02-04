@@ -50,8 +50,9 @@ void program_body()
   nn->layer0.weights()( 0 ) = 1;
   nn->layer0.biases()( 0 ) = 1;
 
-  double x_value = 0;
-  while ( true ) {
+  double x_value = rand() % 30;
+  // while ( true ) {
+  for ( auto i = 0; i < 100; i++ ) {
     cout << "Weight = " << nn->layer0.weights()( 0 ) << ", bias = " << nn->layer0.biases()( 0 ) << "\n";
 
     /* step 1: construct a unique problem instance */
@@ -60,7 +61,8 @@ void program_body()
     input( 0, 0 ) = x_value;
     ground_truth_output( 0, 0 ) = true_function( x_value );
 
-    x_value++; /* use a different problem instance next time */
+    // x_value++; /* use a different problem instance next time */
+    x_value = rand() % 40;
 
     cout << "problem instance: " << input( 0, 0 ) << " => " << ground_truth_output( 0, 0 ) << "\n";
 
@@ -82,6 +84,8 @@ void program_body()
     /* perturb weight */
     nn->layer0.weights()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
     nn->layer0.biases()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+    // nn -> layer0.weights()(0) -= learning_rate * pd_loss_wrt_output;
+    // nn -> layer0.biases()(0) -= learning_rate * pd_loss_wrt_output * nn->layer0.biases()(0);
 
     cout << "\n";
 
