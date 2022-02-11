@@ -1,0 +1,9 @@
+struct_1: {
+	existing_tempo: previous belief about tempo,
+	time_from_prev_event_pressed: int	
+}
+ratios: time_from
+
+current tempo could be int, probability, tempo marking (120) with confidence %
+
+More time since last note played reduces confidence interval
