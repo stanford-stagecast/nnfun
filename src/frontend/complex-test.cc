@@ -82,8 +82,35 @@ void program_body()
       = compute_pd_loss_wrt_output( ground_truth_output( 0, 0 ), nn->output()( 0, 0 ) );
 
     /* perturb weight */
-    nn->layer0.weights()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
-    nn->layer0.biases()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+    auto temp_learning_rate_one = 4.0 / 3 * learning_rate;
+    auto temp_learning_rate_two = 2.0 / 3 * learning_rate;
+    
+    auto current_weights = nn->layer0.weights()( 0 );
+    auto current_biases = nn->layer0.biases()( 0 );
+
+    auto current_loss = loss_function(nn->output()( 0, 0 ), ground_truth_input( 0, 0 ));
+
+    nn->layer0.weights()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
+    nn->layer0.biases()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+
+    auto loss_learning_rate_one = loss_function(nn->output()( 0, 0 ), ground_truth_input( 0, 0 ));
+
+    nn->layers0.weights()( 0 ) = current_weights - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 ); 
+    nn->layers0.biases()( 0 ) = current_biases - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+
+    auto loss_learning_rate_two = loss_function(nn->output()( 0, 0 ), ground_truth_input( 0, 0 ));
+    
+    auto min_loss = min(min(loss_learning_rate_one, loss_learning_rate_two), current_loss);
+    if (min_loss == current_loss) {
+        learning_rate *= 2.0 / 3;
+    } else if (min_loss == loss_learning_rate_one) {
+        nn->layer0.weights()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
+        nn->layer0.biases()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+        learning_rate *= 10.0 / 9;
+    } else {
+        nn->layer0.weights()( 0 ) -= temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
+        nn->layer0.biases()( 0 ) -= temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+    }
     // nn -> layer0.weights()(0) -= learning_rate * pd_loss_wrt_output;
     // nn -> layer0.biases()(0) -= learning_rate * pd_loss_wrt_output * nn->layer0.biases()(0);
 
