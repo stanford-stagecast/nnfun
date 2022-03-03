@@ -9,3 +9,7 @@ add_test_exec (back_propagation_formula)
 add_test_exec (back_propagation_formula_check)
 add_test_exec (back_propagation)
 # add_executable (neuralnetwork "neuralnetwork.cc")
+
+add_test_exec (simple-test)
+add_test_exec (test_boundary)
+add_test_exec (complex-test)
