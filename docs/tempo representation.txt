@@ -1,0 +1,33 @@
+NOTE FOR #2: I think it may be more useful to calculate the time between events when notes are PRESSED DOWN rather than the time between PRESS DOWN and RELEASE. That's because when I count, I often lift notes sligtly earlier than I play the next note. But when I count, I based my counting off when note are pressed down. 
+
+#1 Event times as input (just press down key):
+Input: 
+	- series of last 8 notes events that are PRESSED DOWN with time stamp 
+	- Eg. (0, 15, 30, 45)
+Possible outputs:
+	- Estimated tempo, confidence interval, phase (Eg. 15, 90%, 0)
+	- List of Estimated tempos in order of confidence, with confidence and phase included (Eg. [15, 90%, 0], [30, 90%, 0])
+		- Ordering schema can be sorted based on other criteria as well, esp in events of ties
+
+#2 Event times as input (with press down and release events):
+Input:
+	- Series of last 8 NOTES (include time of PRESS DOWN and RELEASE event)
+	- Eg( curr_Time: 45, [0, 15], [15, 30], [15, 45], [30, 45])
+		- could be reduced to note durations (15, 15, 30, 15)
+Possible outputs:
+	- Same as #1
+		- outputs can be determined based on length of note instead of when notes are pressed 
+	- Cluster as note values instead of tempo
+		- Eg. ([Note 1, Note 2, Note 4 (Average duration: 15), Note 3 (Average value: 30)])
+		- Allows us to represent the tempo in terms of different types of note, which equates to tempo calculation in terms of the type of note
+		- (notes 1, 2, and 4 can be 'quarter notes', note 3 can be a half note)
+
+Notes:
+	- theoretically, smaller tempos have higher confidence (I could more easily count a measure instead of a quarter note, especially if tempo fluctuates within a measure)
+	- However, there should be some upper limit on how high the tempo can go 	
+		- it wouldn't be really useful if a piece lasted for 120 seconds and I just say the tempo is 1 beat per 120 seconds
+	- current time might be an important input to include, as tempo confidence may decrease over time if no new notes are pressed (if a whole note lasting 3 measure is played, people in general are less unsure on the timing of the note afterward)
+	- outputs can be limited to the list of tempos provided on an analog metronome instead of being continuous, we can find the most ideal tempo from a list of possible tempos rather than try to converge to a global maximum indicating ideal tempo
+	- In an ideal world, notes can be clustered based on what type of note they are (quarter note, half note)
+		- However, humans often won't play notes robotically for exactly 15 ms, which can be represented as noise in the data
+		- Longer notes would have more 'noise'
