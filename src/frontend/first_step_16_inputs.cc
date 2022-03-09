@@ -44,7 +44,7 @@ void program_body()
 
   /* seed C RNG for Eigen random weight initialization */
   srand( Timer::timestamp_ns() );
-
+#if 0
   /* construct neural network on heap */
   auto nn = make_unique<Network<float, batch_size, input_size, 1>>();
   nn->layer0.weights()( 0 ) = 1;
@@ -121,6 +121,7 @@ void program_body()
 
     cout << "weight: " << nn->layer0.weights()( 0 ) << ", biase: " << nn->layer0.biases()( 0 ) << endl << endl;
   }
+#endif
 }
 
 int main( int argc, char*[] )
