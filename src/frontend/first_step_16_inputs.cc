@@ -53,12 +53,18 @@ void program_body()
   // Matrix<float, input_size, 1> input(16);
   // input << 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16;
   // cout << true_function(input) << endl;
-  for ( auto i = 0; i < 1000; i++ ) {
+  // for ( auto i = 0; i < 1000; i++ ) {
+  int i = 0;
+  while ( true ) {
+    i++;
     /* step 1: construct a unique problem instance */
     Matrix<float, batch_size, input_size> input, ground_truth_output;
 
-    input << 1 + i, 2 + i, 3 + i, 4 + i, 5 + i, 6 + i, 7 + i, 8 + i, 9 + i, 10 + i, 11 + i, 12 + i, 13 + i, 14 + i,
-      15 + i, 16 + i;
+    // input << 1 + i, 2 + i, 3 + i, 4 + i, 5 + i, 6 + i, 7 + i, 8 + i, 9 + i, 10 + i, 11 + i, 12 + i, 13 + i, 14 +
+    // i, 15 + i, 16 + i;
+    for ( int j = 0; j < 16; j++ ) {
+      input( j ) = rand();
+    }
     ground_truth_output( 0, 0 ) = true_function( input );
 
     cout << "problem instance: from " << input( 0, 0 ) << " to " << input( 0, 15 ) << " => "
