@@ -34,7 +34,7 @@ float true_function( const Matrix<float, input_size, 1>& input )
   return input.sum();
 }
 
-float learning_rate = 0.001;
+float learning_rate = 0.00001;
 
 void program_body()
 {
@@ -80,14 +80,25 @@ void program_body()
 
     // TODO: static eta -> dynamic eta
     learning_rate = 0.001;
-    float loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+    // float loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
 
     for ( int j = 0; j < 16; j++ ) {
-      nn->layer0.weights()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+      nn->layer0.weights()( j ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
     }
     nn->layer0.biases()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
 
-    cout << pd_loss_wrt_output << " " << loss << endl;
+    cout << "weights: " << nn->layer0.weights() << endl;
+
+    // auto four_third_lr = 4.0 / 3 * learning_rate;
+    // auto two_third_lr = 2.0 / 3 * learning_rate;
+
+    /* calculaate three loss */
+    /* current loss */
+    // auto current_weights = nn->layer0.weights()(0);
+    // auto current_biases = nn->layer0.biases()(0);
+    // auto current_loss = loss_function(nn->output()(0,0), ground_truth_output(0,0));
+
+    /* loss for four third learning rate */
   }
 
 #if 0
