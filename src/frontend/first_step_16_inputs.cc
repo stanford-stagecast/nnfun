@@ -53,7 +53,7 @@ void program_body()
   // Matrix<float, input_size, 1> input(16);
   // input << 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16;
   // cout << true_function(input) << endl;
-  for ( auto i = 0; i < 15; i++ ) {
+  for ( auto i = 0; i < 1000; i++ ) {
     /* step 1: construct a unique problem instance */
     Matrix<float, batch_size, input_size> input, ground_truth_output;
 
@@ -79,26 +79,61 @@ void program_body()
       = compute_pd_loss_wrt_output( ground_truth_output( 0, 0 ), nn->output()( 0, 0 ) );
 
     // TODO: static eta -> dynamic eta
-    learning_rate = 0.001;
-    // float loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+    auto four_third_lr = 4.0 / 3 * learning_rate;
+    auto two_third_lr = 2.0 / 3 * learning_rate;
 
+    /* calculate three loss */
+    float current_loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+    Matrix<float, input_size, 1> current_weights;
     for ( int j = 0; j < 16; j++ ) {
-      nn->layer0.weights()( j ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+      current_weights( j ) = nn->layer0.weights()( j );
     }
-    nn->layer0.biases()( 0 ) -= learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
+    auto current_biase = nn->layer0.biases()( 0 );
+
+    /* loss for 4/3 eta */
+    for ( int j = 0; j < 16; j++ ) {
+      nn->layer0.weights()( j ) -= four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+    }
+    nn->layer0.biases()( 0 ) -= four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
+    nn->apply( input );
+    auto loss_four_third_lr = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+
+    /* loss for 2/3 eta */
+    for ( int j = 0; j < 16; j++ ) {
+      nn->layer0.weights()( j )
+        = current_weights( j ) - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+    }
+    nn->layer0.biases()( 0 )
+      = current_biase - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
+    nn->apply( input );
+    auto loss_two_third_lr = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+
+    cout << current_loss << " " << loss_four_third_lr << " " << loss_two_third_lr << endl;
+    auto min_loss = min( min( current_loss, loss_four_third_lr ), loss_two_third_lr );
+    if ( min_loss == current_loss ) {
+      learning_rate *= 2.0 / 3;
+      for ( int j = 0; j < 16; j++ ) {
+        nn->layer0.weights()( j ) = current_weights( j );
+      }
+      nn->layer0.biases()( 0 ) = current_biase;
+    } else if ( min_loss == loss_four_third_lr ) {
+      for ( int j = 0; j < 16; j++ ) {
+        nn->layer0.weights()( j )
+          = current_weights( j ) - four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+      }
+      nn->layer0.biases()( 0 )
+        = current_biase - four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
+    } else {
+      for ( int j = 0; j < 16; j++ ) {
+        nn->layer0.weights()( j )
+          = current_weights( j ) - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+      }
+      nn->layer0.biases()( 0 )
+        = current_biase - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
+    }
 
     cout << "weights: " << nn->layer0.weights() << endl;
-
-    // auto four_third_lr = 4.0 / 3 * learning_rate;
-    // auto two_third_lr = 2.0 / 3 * learning_rate;
-
-    /* calculaate three loss */
-    /* current loss */
-    // auto current_weights = nn->layer0.weights()(0);
-    // auto current_biases = nn->layer0.biases()(0);
-    // auto current_loss = loss_function(nn->output()(0,0), ground_truth_output(0,0));
-
-    /* loss for four third learning rate */
+    cout << "biase: " << nn->layer0.biases()( 0 ) << endl;
   }
 
 #if 0
@@ -107,34 +142,8 @@ void program_body()
     auto temp_learning_rate_one = 4.0 / 3 * learning_rate;
     auto temp_learning_rate_two = 2.0 / 3 * learning_rate;
 
-    /* loss if not modifying weight or biase */
-    auto current_weights = nn->layer0.weights()( 0 );
-    auto current_biases = nn->layer0.biases()( 0 );
-
-    auto current_loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
-
-    nn->layer0.weights()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
-    nn->layer0.biases()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
-    nn->apply( input );
-
-    /* loss if decrementing eta */
-    auto loss_learning_rate_one = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
-
-    nn->layer0.weights()( 0 )
-      = current_weights - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
-    nn->layer0.biases()( 0 )
-      = current_biases - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
-    nn->apply( input );
-
-    /* loss if incrementing eta */
-    auto loss_learning_rate_two = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
-
     auto min_loss = min( min( loss_learning_rate_one, loss_learning_rate_two ), current_loss );
     cout << loss_learning_rate_one << " " << loss_learning_rate_two << " " << current_loss << endl;
-    if ( min_loss == current_loss ) {
-      learning_rate *= 2.0 / 3;
-      nn->layer0.weights()( 0 ) = current_weights;
-      nn->layer0.biases()( 0 ) = current_biases;
     } else if ( min_loss == loss_learning_rate_one ) {
       nn->layer0.weights()( 0 )
         = current_weights - temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
