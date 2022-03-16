@@ -1,3 +1,10 @@
+/**
+  This file creates a one-layer neural network to calculate the sum of the 16
+  inputs. It does a good drop when the 16 inputs are purely random, but is
+  slightly skewed if the inputs grow from 1-16 to very large 16 consecutive
+  integers.
+  Next step: to count the interval of the 16 inputs --> beat
+*/
 #include "exception.hh"
 #include "network.hh"
 #include "timer.hh"
@@ -141,31 +148,6 @@ void program_body()
     cout << "weights: " << nn->layer0.weights() << endl;
     cout << "biase: " << nn->layer0.biases()( 0 ) << endl;
   }
-
-#if 0
-  for ( auto i = 0; i < 1000; i++ ) {
-    /* step 3: backpropagate error */
-    auto temp_learning_rate_one = 4.0 / 3 * learning_rate;
-    auto temp_learning_rate_two = 2.0 / 3 * learning_rate;
-
-    auto min_loss = min( min( loss_learning_rate_one, loss_learning_rate_two ), current_loss );
-    cout << loss_learning_rate_one << " " << loss_learning_rate_two << " " << current_loss << endl;
-    } else if ( min_loss == loss_learning_rate_one ) {
-      nn->layer0.weights()( 0 )
-        = current_weights - temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
-      nn->layer0.biases()( 0 )
-        = current_biases - temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
-      learning_rate *= 4.0 / 3;
-    } else {
-      nn->layer0.weights()( 0 )
-        = current_weights - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
-      nn->layer0.biases()( 0 )
-        = current_biases - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
-    }
-
-    cout << "weight: " << nn->layer0.weights()( 0 ) << ", biase: " << nn->layer0.biases()( 0 ) << endl << endl;
-  }
-#endif
 }
 
 int main( int argc, char*[] )
