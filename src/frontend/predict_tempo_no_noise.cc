@@ -1,6 +1,8 @@
 /**
   This file creates a one-layer neural network to calculate the beat from 16
   inputs.
+  
+  We want range of tempo: 35 - 250 bpm //TODO
 */
 #include "exception.hh"
 #include "network.hh"
@@ -127,6 +129,7 @@ void program_body()
       }
       nn->layer0.biases()( 0 ) = current_biase;
     } else if ( min_loss == loss_four_third_lr ) {
+	  learning_rate *= 4.0 / 3;
       for ( int j = 0; j < 16; j++ ) {
         nn->layer0.weights()( j )
           = current_weights( j ) - four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );

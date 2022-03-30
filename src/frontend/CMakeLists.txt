@@ -12,4 +12,4 @@ add_test_exec (back_propagation)
 
 add_subdirectory ("./linear_predictor")
 add_test_exec (first_step_16_inputs)
-add_test_exec (predict_beat)
+add_test_exec (predict_tempo_no_noise)
