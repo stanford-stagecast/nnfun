@@ -61,7 +61,7 @@ void program_body()
 
   int tempo = 50;
   float offset = 0;
-  for ( tempo = 50; tempo < 70; tempo++ ) {
+  for ( tempo = 70; tempo > 50; tempo-- ) {
     /* test true function */
     int i = 0;
     while ( true ) {
@@ -69,7 +69,7 @@ void program_body()
         break;
       i += 1;
       /* step 1: construct a unique problem instance */
-      Matrix<float, batch_size, input_size> input = gen_time( tempo, offset );
+      Matrix<float, batch_size, input_size> input = gen_time( tempo, offset + i );
 
       /* step 2: forward propagate and calculate loss functiom */
       nn->apply( input );
@@ -139,9 +139,11 @@ void program_body()
       cout << "biase: " << nn->layer0.biases()( 0 ) << endl;
     }
   }
-  Matrix<float, batch_size, input_size> input = gen_time( 68, 0 );
-  nn->apply( input );
-  cout << nn->output()( 0, 0 ) << endl;
+  for ( int i = 40; i < 80; i++ ) {
+    Matrix<float, batch_size, input_size> input = gen_time( i, 0 );
+    nn->apply( input );
+    cout << "input: " << i << " output: " << nn->output()( 0, 0 ) << endl;
+  }
 }
 
 int main( int argc, char*[] )
