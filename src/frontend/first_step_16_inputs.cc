@@ -1,3 +1,10 @@
+/**
+  This file creates a one-layer neural network to calculate the sum of the 16
+  inputs. It does a good drop when the 16 inputs are purely random, but is
+  slightly skewed if the inputs grow from 1-16 to very large 16 consecutive
+  integers.
+  Next step: to count the interval of the 16 inputs --> beat
+*/
 #include "exception.hh"
 #include "network.hh"
 #include "timer.hh"
@@ -14,7 +21,7 @@ using namespace std;
 using namespace Eigen;
 
 constexpr size_t batch_size = 1;
-constexpr size_t input_size = 1;
+constexpr size_t input_size = 16;
 
 /* use squared error as loss function */
 float loss_function( const float target, const float actual )
@@ -29,12 +36,12 @@ float compute_pd_loss_wrt_output( const float target, const float actual )
 }
 
 /* actual function we want the neural network to learn */
-float true_function( const float input )
+float true_function( const Matrix<float, input_size, 1>& input )
 {
-  return 3 * input + 1;
+  return input.sum();
 }
 
-float learning_rate = 0.001;
+float learning_rate = 0.00001;
 
 void program_body()
 {
@@ -44,29 +51,38 @@ void program_body()
 
   /* seed C RNG for Eigen random weight initialization */
   srand( Timer::timestamp_ns() );
-#if 0
+
   /* construct neural network on heap */
   auto nn = make_unique<Network<float, batch_size, input_size, 1>>();
-  nn->layer0.weights()( 0 ) = 1;
-  nn->layer0.biases()( 0 ) = 1;
+  nn->layer0.initializeWeightsRandomly();
 
-  for ( auto i = 0; i < 1000; i++ ) {
+  /* test true function */
+  // Matrix<float, input_size, 1> input(16);
+  // input << 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16;
+  // cout << true_function(input) << endl;
+  // for ( auto i = 0; i < 1000; i++ ) {
+  int i = 0;
+  while ( true ) {
+    i++;
     /* step 1: construct a unique problem instance */
     Matrix<float, batch_size, input_size> input, ground_truth_output;
 
-    double x_value = rand();
-    input( 0, 0 ) = x_value;
-    ground_truth_output( 0, 0 ) = true_function( x_value );
+    // input << 1 + i, 2 + i, 3 + i, 4 + i, 5 + i, 6 + i, 7 + i, 8 + i, 9 + i, 10 + i, 11 + i, 12 + i, 13 + i, 14 +
+    // i, 15 + i, 16 + i;
+    for ( int j = 0; j < 16; j++ ) {
+      input( j ) = rand();
+    }
+    ground_truth_output( 0, 0 ) = true_function( input );
 
-    cout << "problem instance: " << input( 0, 0 ) << " => " << ground_truth_output( 0, 0 ) << "\n";
+    cout << "problem instance: from " << input( 0, 0 ) << " to " << input( 0, 15 ) << " => "
+         << ground_truth_output( 0, 0 ) << endl;
 
-    /* step 2: forward propagate and calculate loss function */
+    /* step 2: forward propagate and calculate loss functiom */
     nn->apply( input );
+    cout << "nn maps input: " << input( 0, 0 ) << " to " << input( 0, 15 ) << " => " << nn->output()( 0, 0 )
+         << endl;
 
-    cout << "NN maps " << input( 0, 0 ) << " => " << nn->output()( 0, 0 ) << "\n";
-
-    cout << "loss when " << ground_truth_output( 0, 0 ) << " desired, " << nn->output()( 0, 0 )
-         << " produced = " << loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) ) << "\n";
+    cout << "loss: " << loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) ) << endl;
 
     /* step 3: backpropagate error */
     nn->computeDeltas();
@@ -75,53 +91,63 @@ void program_body()
     const float pd_loss_wrt_output
       = compute_pd_loss_wrt_output( ground_truth_output( 0, 0 ), nn->output()( 0, 0 ) );
 
-    auto temp_learning_rate_one = 4.0 / 3 * learning_rate;
-    auto temp_learning_rate_two = 2.0 / 3 * learning_rate;
+    // TODO: static eta -> dynamic eta
+    auto four_third_lr = 4.0 / 3 * learning_rate;
+    auto two_third_lr = 2.0 / 3 * learning_rate;
 
-    /* loss if not modifying weight or biase */
-    auto current_weights = nn->layer0.weights()( 0 );
-    auto current_biases = nn->layer0.biases()( 0 );
+    /* calculate three loss */
+    float current_loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+    Matrix<float, input_size, 1> current_weights;
+    for ( int j = 0; j < 16; j++ ) {
+      current_weights( j ) = nn->layer0.weights()( j );
+    }
+    auto current_biase = nn->layer0.biases()( 0 );
 
-    auto current_loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
-
-    nn->layer0.weights()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
-    nn->layer0.biases()( 0 ) -= temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+    /* loss for 4/3 eta */
+    for ( int j = 0; j < 16; j++ ) {
+      nn->layer0.weights()( j ) -= four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+    }
+    nn->layer0.biases()( 0 ) -= four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
     nn->apply( input );
+    auto loss_four_third_lr = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
 
-    /* loss if decrementing eta */
-    auto loss_learning_rate_one = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
-
-    nn->layer0.weights()( 0 )
-      = current_weights - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
+    /* loss for 2/3 eta */
+    for ( int j = 0; j < 16; j++ ) {
+      nn->layer0.weights()( j )
+        = current_weights( j ) - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+    }
     nn->layer0.biases()( 0 )
-      = current_biases - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+      = current_biase - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
     nn->apply( input );
+    auto loss_two_third_lr = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
 
-    /* loss if incrementing eta */
-    auto loss_learning_rate_two = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
-
-    auto min_loss = min( min( loss_learning_rate_one, loss_learning_rate_two ), current_loss );
-    cout << loss_learning_rate_one << " " << loss_learning_rate_two << " " << current_loss << endl;
+    cout << current_loss << " " << loss_four_third_lr << " " << loss_two_third_lr << endl;
+    auto min_loss = min( min( current_loss, loss_four_third_lr ), loss_two_third_lr );
     if ( min_loss == current_loss ) {
       learning_rate *= 2.0 / 3;
-      nn->layer0.weights()( 0 ) = current_weights;
-      nn->layer0.biases()( 0 ) = current_biases;
-    } else if ( min_loss == loss_learning_rate_one ) {
-      nn->layer0.weights()( 0 )
-        = current_weights - temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
+      for ( int j = 0; j < 16; j++ ) {
+        nn->layer0.weights()( j ) = current_weights( j );
+      }
+      nn->layer0.biases()( 0 ) = current_biase;
+    } else if ( min_loss == loss_four_third_lr ) {
+      for ( int j = 0; j < 16; j++ ) {
+        nn->layer0.weights()( j )
+          = current_weights( j ) - four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+      }
       nn->layer0.biases()( 0 )
-        = current_biases - temp_learning_rate_one * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
-      learning_rate *= 4.0 / 3;
+        = current_biase - four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
     } else {
-      nn->layer0.weights()( 0 )
-        = current_weights - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 0 );
+      for ( int j = 0; j < 16; j++ ) {
+        nn->layer0.weights()( j )
+          = current_weights( j ) - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, j );
+      }
       nn->layer0.biases()( 0 )
-        = current_biases - temp_learning_rate_two * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 1 );
+        = current_biase - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
     }
 
-    cout << "weight: " << nn->layer0.weights()( 0 ) << ", biase: " << nn->layer0.biases()( 0 ) << endl << endl;
+    cout << "weights: " << nn->layer0.weights() << endl;
+    cout << "biase: " << nn->layer0.biases()( 0 ) << endl;
   }
-#endif
 }
 
 int main( int argc, char*[] )
