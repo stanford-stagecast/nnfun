@@ -39,7 +39,7 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, float offset )
 {
   Matrix<float, batch_size, input_size> ret_mat;
   for ( auto i = 0; i < 16; i++ ) {
-    ret_mat( i ) = 60 / tempo * i + offset;
+    ret_mat( i ) = tempo * i + offset;
   }
   return ret_mat;
 }
@@ -65,28 +65,29 @@ void program_body()
     /* test true function */
     int i = 0;
     while ( true ) {
-      if ( i == 20 )
+      if ( i == 5 )
         break;
       i += 1;
+      float rand_offset = 0;
       /* step 1: construct a unique problem instance */
-      Matrix<float, batch_size, input_size> input = gen_time( tempo, offset + i );
+      Matrix<float, batch_size, input_size> input = gen_time( 60.0 / tempo, offset + rand_offset );
 
       /* step 2: forward propagate and calculate loss functiom */
       nn->apply( input );
-      cout << "nn maps input: tempo: " << tempo << " offset " << offset << " => " << nn->output()( 0, 0 ) << endl;
+      cout << "nn maps input: tempo: " << 60.0 / tempo << " offset " << offset + rand_offset << " => " << nn->output()( 0, 0 ) << endl;
 
       /* step 3: backpropagate error */
       nn->computeDeltas();
       nn->evaluateGradients( input );
 
-      const float pd_loss_wrt_output = compute_pd_loss_wrt_output( tempo, nn->output()( 0, 0 ) );
+      const float pd_loss_wrt_output = compute_pd_loss_wrt_output( 60.0 / tempo, nn->output()( 0, 0 ) );
 
       // TODO: static eta -> dynamic eta
       auto four_third_lr = 4.0 / 3 * learning_rate;
       auto two_third_lr = 2.0 / 3 * learning_rate;
 
       /* calculate three loss */
-      float current_loss = loss_function( nn->output()( 0, 0 ), tempo );
+      float current_loss = loss_function( nn->output()( 0, 0 ), 60.0 / tempo );
       Matrix<float, input_size, 1> current_weights;
       for ( int j = 0; j < 16; j++ ) {
         current_weights( j ) = nn->layer0.weights()( j );
@@ -99,7 +100,7 @@ void program_body()
       }
       nn->layer0.biases()( 0 ) -= four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
       nn->apply( input );
-      auto loss_four_third_lr = loss_function( nn->output()( 0, 0 ), tempo );
+      auto loss_four_third_lr = loss_function( nn->output()( 0, 0 ), 60.0 / tempo );
 
       /* loss for 2/3 eta */
       for ( int j = 0; j < 16; j++ ) {
@@ -109,7 +110,7 @@ void program_body()
       nn->layer0.biases()( 0 )
         = current_biase - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
       nn->apply( input );
-      auto loss_two_third_lr = loss_function( nn->output()( 0, 0 ), tempo );
+      auto loss_two_third_lr = loss_function( nn->output()( 0, 0 ), 60.0 / tempo );
 
       cout << current_loss << " " << loss_four_third_lr << " " << loss_two_third_lr << endl;
       auto min_loss = min( min( current_loss, loss_four_third_lr ), loss_two_third_lr );
@@ -140,9 +141,9 @@ void program_body()
     }
   }
   for ( int i = 40; i < 80; i++ ) {
-    Matrix<float, batch_size, input_size> input = gen_time( i, 0 );
+    Matrix<float, batch_size, input_size> input = gen_time( 60.0 / i, 0 );
     nn->apply( input );
-    cout << "input: " << i << " output: " << nn->output()( 0, 0 ) << endl;
+    cout << "input: " << i << " output: " << 60.0 / nn->output()( 0, 0 ) << endl;
   }
 }
 
