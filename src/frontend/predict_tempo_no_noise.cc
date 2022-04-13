@@ -74,7 +74,8 @@ void program_body()
 
       /* step 2: forward propagate and calculate loss functiom */
       nn->apply( input );
-      cout << "nn maps input: tempo: " << 60.0 / tempo << " offset " << offset + rand_offset << " => " << nn->output()( 0, 0 ) << endl;
+      cout << "nn maps input: tempo: " << 60.0 / tempo << " offset " << offset + rand_offset << " => "
+           << nn->output()( 0, 0 ) << endl;
 
       /* step 3: backpropagate error */
       nn->computeDeltas();
