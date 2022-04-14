@@ -57,15 +57,19 @@ void program_body()
 
   /* construct neural network on heap */
   auto nn = make_unique<Network<float, batch_size, input_size, 1>>();
-  nn->layer0.initializeWeightsRandomly();
+  // nn->layer0.initializeWeightsRandomly();
+  for ( int i = 0; i < 16; i++ ) {
+    nn->layer0.weights()( i ) = 0;
+  }
+  nn->layer0.biases()( 0 ) = 0;
 
   int tempo = 50;
   float offset = 0;
-  for ( tempo = 70; tempo > 50; tempo-- ) {
+  for ( tempo = 70; tempo > 54; tempo-- ) {
     /* test true function */
     int i = 0;
     while ( true ) {
-      if ( i == 5 )
+      if ( i == 1 )
         break;
       i += 1;
       float rand_offset = 0;
@@ -141,10 +145,12 @@ void program_body()
       cout << "biase: " << nn->layer0.biases()( 0 ) << endl;
     }
   }
-  for ( int i = 40; i < 80; i++ ) {
+  for ( int i = 80; i < 120; i++ ) {
     Matrix<float, batch_size, input_size> input = gen_time( 60.0 / i, 0 );
     nn->apply( input );
-    cout << "input: " << i << " output: " << 60.0 / nn->output()( 0, 0 ) << endl;
+    // cout << "input: " << i << " output: " << 60.0 / nn->output()( 0, 0 ) << endl;
+    cout << 60.0 / nn->output()( 0, 0 ) << endl;
+    // cout << i << endl;
   }
 }
 

@@ -1,0 +1,14 @@
+Music Hackathon 04/13/2022:
+Before Hackathon:
+- right direction (i.e. ascending) on 40-80 trained on 70-51, one iteration each
+- problem: too randomized
+- inputs: x, graph: 1/x
+
+During Hackathon:
+- initialize all weights/biase to 0
+- tested other ranges: 80-120, result is good (graphs on Zulip)
+- temporarily happy with the 0-initialization
+
+After Hackathon:
+- need to test noise offset
+- need to test if need another layer
