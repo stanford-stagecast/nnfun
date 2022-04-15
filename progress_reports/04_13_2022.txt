@@ -7,7 +7,7 @@ Before Hackathon:
 During Hackathon:
 - initialize all weights/biase to 0
 - tested other ranges: 80-120, result is good (graphs on Zulip)
-- temporarily happy with the 0-initialization
+- temporarily happy with the 0-initialization [fix on 04/15: no longer temporarily happy]
 
 After Hackathon:
 - need to test noise offset
