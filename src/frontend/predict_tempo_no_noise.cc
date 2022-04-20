@@ -58,11 +58,7 @@ void program_body()
   /* construct neural network on heap */
   auto nn = make_unique<Network<float, batch_size, input_size, 1>>();
   nn->layer0.initializeWeightsRandomly();
-  /*for ( int i = 0; i < 16; i++ ) {
-    nn->layer0.weights()( i ) = 0;
-  }
-  nn->layer0.biases()( 0 ) = 0;
-  */
+
   int tempo = 50;
   float offset = 0;
   for ( tempo = 70; tempo > 50; tempo-- ) {
@@ -72,14 +68,12 @@ void program_body()
       if ( i == 5 )
         break;
       i += 1;
-      float rand_offset = 0;
       /* step 1: construct a unique problem instance */
-      Matrix<float, batch_size, input_size> input = gen_time( tempo, offset + rand_offset );
+      Matrix<float, batch_size, input_size> input = gen_time( tempo, offset );
 
       /* step 2: forward propagate and calculate loss functiom */
       nn->apply( input );
-      cout << "nn maps input: tempo: " << tempo << " offset " << offset + rand_offset << " => "
-           << nn->output()( 0, 0 ) << endl;
+      cout << "nn maps input: tempo: " << tempo << " offset " << offset << " => " << nn->output()( 0, 0 ) << endl;
 
       /* step 3: backpropagate error */
       nn->computeDeltas();
