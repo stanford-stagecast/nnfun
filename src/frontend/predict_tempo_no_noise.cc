@@ -145,12 +145,12 @@ void program_body()
       cout << "biase: " << nn->layer0.biases()( 0 ) << endl;
     }
   }
-  for ( int i = 80; i < 120; i++ ) {
+  for ( int i = 40; i < 80; i++ ) {
     Matrix<float, batch_size, input_size> input = gen_time( i, 0 );
     nn->apply( input );
     cout << "input: " << i << " output: " << nn->output()( 0, 0 ) << endl;
-    //cout << nn->output()( 0, 0 ) << endl;
-    // cout << i << endl;
+    // cout << nn->output()( 0, 0 ) << endl;
+    //  cout << i << endl;
   }
   cout << "yay!" << endl;
 }
