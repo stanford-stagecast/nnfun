@@ -1,0 +1,24 @@
+Music Hackathon 04/13/2022:
+Before Hackathon:
+- right direction (i.e. ascending) on 40-80 trained on 70-51, one iteration each
+- problem: too randomized
+- inputs: x, graph: 1/x
+
+During Hackathon:
+- initialize all weights/biase to 0
+- tested other ranges: 80-120, result is good (graphs on Zulip)
+- temporarily happy with the 0-initialization [fix on 04/15: no longer temporarily happy]
+
+After Hackathon:
+- need to test noise offset
+- need to test if need another layer
+
+[Updates on 04/19/2022]:
+The current code works find with noise ranging from [-1,1]. Graphos on Zulip.
+Things to be done:
+1) Try to find a way for the nn to predict y=3/x, so that we might be able to 
+   predict tempo instead of 1/tempo.
+2) Try to figure out why the current code does not work with zero initialization;
+   if possible, fix it so that it works with random initialization.
+3) Make it work with non-zero offsets.
+4) Make the new nn robust with reasonable noise.
