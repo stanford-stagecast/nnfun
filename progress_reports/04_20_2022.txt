@@ -1,0 +1,16 @@
+Before Hackathon:
+- Derek has proved that one layer neural network cannot predict 1/x.
+- Hope to solve the four problems described in the previous report.
+
+During Hackathon:
+- Somehow fixed 1) and 2) by removing all ''60/'' in the code.
+  The code works with random initialization.
+  It's also predicting tempo instead of 1/tempo.
+  The code works fine with nosie [-1,1]/
+  [Update: not really fixed it because gen_time should not be modified]
+- There are still some problems with offsets (problem numeber 3).
+- Haven't figured out how to build the two-layer nn from current codes.
+
+After Hackathon:
+- It seems that it's important to predict 1/x. Before that, we need to be 
+  familiar with multi-layer nn.
