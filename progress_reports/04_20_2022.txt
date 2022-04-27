@@ -14,3 +14,13 @@ During Hackathon:
 After Hackathon:
 - It seems that it's important to predict 1/x. Before that, we need to be 
   familiar with multi-layer nn.
+
+[Updates on 04/26:]
+We've figured out how to use a multi-layer nn (including how to modify weights 
+and biases in the interim layers).
+Currently the two experiments on predicting 1/x are 1->1->1 and 1->16->1, but 
+neither works. The next step is to figuring out the way of adding more layers/
+more nodes or using other techniques to figure out how to predict 1/x. [Derek 
+and Jamie will work on it.]
+Another goal we want to acheive is to predict 1/tempo with non-zero offsets. 
+[Yasmin and Nolan will work on it.]
