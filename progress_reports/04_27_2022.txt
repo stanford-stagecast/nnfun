@@ -1,0 +1,11 @@
+Before Hackathon:
+- The goal for today's hackathon:
+  Derek:
+  Jamie: After searching online, I find it might be helpful to add more layers 
+         and more nodes. I'm going to implement a template to make it more 
+         convenient to add more layers and internal nodes.
+         Afterwards I'm going to test how many layers or nodes are needed.
+
+During Hackathon:
+
+After Hackathon:
