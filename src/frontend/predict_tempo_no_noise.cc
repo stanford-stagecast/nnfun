@@ -80,6 +80,7 @@ void program_body()
       nn->evaluateGradients( input );
 
       const float pd_loss_wrt_output = compute_pd_loss_wrt_output( tempo, nn->output()( 0, 0 ) );
+      cout << "Original loss: " << pd_loss_wrt_output << "\n";
 
       // TODO: static eta -> dynamic eta
       auto four_third_lr = 4.0 / 3 * learning_rate;
