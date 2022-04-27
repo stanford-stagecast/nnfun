@@ -7,5 +7,15 @@ Before Hackathon:
          Afterwards I'm going to test how many layers or nodes are needed.
 
 During Hackathon:
+- Derek:
+	-links to sites regarding non-linear approximation using neural networks:
+		-https://www.researchgate.net/publication/222395244_An_efficient_simplified_neural_network_for_solving_linear_and_quadratic_programming_problems
+			-text not available on website
+		-https://stats.stackexchange.com/questions/404410/learning-a-quadratic-function-using-tensorflow-keras
+			-here, x and x^2 are passed as inputs, not just x
+		-https://forums.fast.ai/t/how-to-train-a-nn-model-to-fit-a-quadratic-function-y-x-2/45998/4
+			-seems like theoretically, linear and relu layers cannot approximate quadratic functions (And therefore, inverse functions.) However, within a certain range,
+			a polynomial can be emulated by a neural network. training domain is important
+	
 
 After Hackathon:
