@@ -31,7 +31,7 @@ float compute_pd_loss_wrt_output( const float target, const float actual )
 /* actual function we want the neural network to learn */
 float true_function( const float input )
 {
-  //return 3 * input + 1;
+  // return 3 * input + 1;
   return 1.0 / input;
 }
 
@@ -48,8 +48,8 @@ void program_body()
 
   /* construct neural network on heap */
   auto nn = make_unique<Network<float, batch_size, input_size, 1>>();
-  //nn->layer0.weights()( 0 ) = 1;
-  //nn->layer0.biases()( 0 ) = 1;
+  // nn->layer0.weights()( 0 ) = 1;
+  // nn->layer0.biases()( 0 ) = 1;
   nn->layer0.initializeWeightsRandomly();
 
   for ( auto i = 0; i < 1000; i++ ) {
