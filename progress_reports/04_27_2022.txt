@@ -1,6 +1,6 @@
 Before Hackathon:
 - The goal for today's hackathon:
-  Derek:
+  Derek: Listen to synthesizer, research ways that ai models predict 1/x, x^2, try to implement.
   Jamie: After searching online, I find it might be helpful to add more layers 
          and more nodes. I'm going to implement a template to make it more 
          convenient to add more layers and internal nodes.
