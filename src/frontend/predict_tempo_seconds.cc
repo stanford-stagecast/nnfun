@@ -77,8 +77,8 @@ void program_body()
       if ( i == 1 )
         break;
       i += 1;
-      float rand_offset = 0;
-      //float rand_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/5));
+      //float rand_offset = 0;
+      float rand_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/5));
       /* step 1: construct a unique problem instance */
       Matrix<float, batch_size, input_size> input = gen_time( tempo, offset + rand_offset );
 
@@ -152,8 +152,9 @@ void program_body()
     }
   }
   }
-  for ( int i = 20; i < 200; i++ ) {
-    Matrix<float, batch_size, input_size> input = gen_time( 60.0/i, 0 );
+  for ( int i = 20; i < 400; i++ ) {
+    float test_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/5));
+    Matrix<float, batch_size, input_size> input = gen_time( 60.0/i, test_offset );
     nn->apply( input );
     cout << "input: " << i << " output: " << 60.0/nn->output()( 0, 0 ) << endl;
     //cout << nn->output()( 0, 0 ) << endl;
