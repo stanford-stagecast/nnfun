@@ -1,6 +1,6 @@
 macro (add_test_exec exec_name)
     add_executable ("${exec_name}" "${exec_name}.cc")
-    target_link_libraries ("${exec_name}" util ${Eigen_LDFLAGS} ${Eigen_LDFLAGS_OTHER})
+    target_link_libraries ("${exec_name}" util audio ${Eigen_LDFLAGS} ${Eigen_LDFLAGS_OTHER})
 endmacro (add_test_exec)
 
 add_test_exec (forward_propagation)
@@ -14,3 +14,4 @@ add_subdirectory ("./linear_predictor")
 add_test_exec (first_step_16_inputs)
 add_test_exec (predict_tempo_no_noise)
 add_test_exec (predict_tempo_with_noise)
+add_test_exec (predict_tempo_midi_input)

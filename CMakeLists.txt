@@ -14,9 +14,11 @@ include_directories ( SYSTEM ${Eigen_INCLUDE_DIRS} )
 add_compile_options ( ${Eigen_CFLAGS} )
 
 include_directories ("${PROJECT_SOURCE_DIR}/src/util")
+include_directories ("${PROJECT_SOURCE_DIR}/src/audio")
 include_directories ("${PROJECT_SOURCE_DIR}/src/nn")
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/util")
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/audio")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/frontend")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/tests")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/nn")
