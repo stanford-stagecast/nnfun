@@ -6,6 +6,7 @@
 #include <iostream>
 #include <random>
 #include <utility>
+#include <memory>
 
 #include <sys/resource.h>
 
@@ -30,27 +31,39 @@ constexpr size_t batch_size = 1;
 constexpr size_t input_size = 1;
 constexpr size_t output_size = 1;
 vector<unsigned int> layers{ input_size, 1, output_size };
+// TODO do not know how to put the vector into nn
 
-void program_body() {
+void program_body(Matrix<float, batch_size, input_size> input, Matrix<float, batch_size, output_size> ground_truth_output) {
   /* remove limit on stack size */
   const rlimit limits { RLIM_INFINITY, RLIM_INFINITY };
   CheckSystemCall( "setrlimit", setrlimit( RLIMIT_STACK, &limits ) );
 
   /* construct neural network on heap */
   auto nn = make_unique<Network<float, batch_size, input_size, 1, output_size>>();
-  auto temp = *(&nn);
-  vector<Network> pointer_to_layers;
-  for (int i = 0; i < layers.size(); i++) {
-    cout << "hi" << endl; 
-  }
+  //auto temp = nn.get();
+  /*vector<Network<float, unsigned int, unsigned int, unsigned int, unsigned int>> pointer_to_layers;
+  for (int i = 0; i < (int)layers.size(); i++) {
+    pointer_to_layers.push_back(temp);
+    temp = nn->next;
+  }*/ //TODO do not know how to add all layers into a vector
 
-  //nn->print();
+   nn->initializeWeightsRandomly();
+
+   nn->apply(input);
+   cout << loss_function(nn->output()(0,0), ground_truth_output(0,0));
+
+   nn->print();
 }
 
 int main( int argc, char*[] ) {
   try {
     if ( argc <= 0 ) {abort();}
-    program_body();
+    Matrix<float, batch_size, input_size> input, ground_truth_output;
+
+    double x_value = rand();
+    input( 0, 0 ) = x_value;
+    ground_truth_output( 0, 0 ) = true_function( x_value );
+    program_body(input, ground_truth_output);
     return EXIT_SUCCESS;
   } catch ( const exception& e ) {
       return EXIT_FAILURE;
