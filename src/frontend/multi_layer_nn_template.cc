@@ -25,7 +25,7 @@ float true_function( const float input ) {
   return 1.0 / input;
 }
 
-float learning_rate = 0.001;
+float learning_rate = 100;
 
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 1;
@@ -50,8 +50,34 @@ void program_body(Matrix<float, batch_size, input_size> input, Matrix<float, bat
    nn->initializeWeightsRandomly();
 
    nn->apply(input);
-   cout << loss_function(nn->output()(0,0), ground_truth_output(0,0));
 
+   nn->print();
+   nn->computeDeltas();
+   nn->evaluateGradients(input);
+
+   const float pd_loss_wrt_output = compute_pd_loss_wrt_output( ground_truth_output( 0, 0 ), nn->output()( 0, 0 ) );
+   cout << pd_loss_wrt_output << endl;
+   float loss = 0.0;
+   for (int i = 0; i < (int)output_size; i++) {
+     loss += loss_function(nn->output()(0,i), ground_truth_output(0,i));
+   }
+
+   decltype(nn.get()) temp = nn.get();
+   for (auto i = 0; i < (int)nn->getNumLayers(); i++) {
+     cout << "i: " << i << endl;
+     
+     for (auto j = 0; j < (int)temp->getNumParams(i); j++) {
+       // weights
+       if (j < (int)temp->getLayerInputSize(i)) {
+         temp->layer0.weights()(j) -= learning_rate * pd_loss_wrt_output * temp->getEvaluatedGradient(i,j);
+       }
+       //biase
+       else {
+         temp->layer0.biases()(j - (int)temp->getLayerInputSize(i)) -= learning_rate * pd_loss_wrt_output * temp->getEvaluatedGradient(i,j);
+       }
+     }
+     //temp = reinterpret_cast<decltype(temp->next)> (temp->next);
+   }
    nn->print();
 }
 
@@ -60,7 +86,7 @@ int main( int argc, char*[] ) {
     if ( argc <= 0 ) {abort();}
     Matrix<float, batch_size, input_size> input, ground_truth_output;
 
-    double x_value = rand();
+    double x_value = 2.0;
     input( 0, 0 ) = x_value;
     ground_truth_output( 0, 0 ) = true_function( x_value );
     program_body(input, ground_truth_output);
