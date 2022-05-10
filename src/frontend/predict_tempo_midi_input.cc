@@ -44,7 +44,7 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, float offset )
 {
   Matrix<float, batch_size, input_size> ret_mat;
   for ( auto i = 0; i < 16; i++ ) {
-    ret_mat( i ) = tempo * i + offset + 2 * ( (float)rand() ) / ( (float)RAND_MAX ) - 1;
+    ret_mat( i ) = i/(tempo/60.0) + offset + 2 * ( (float)rand() ) / ( (float)RAND_MAX ) - 1;
   }
   return ret_mat;
 }
@@ -68,8 +68,13 @@ Matrix<float, batch_size, input_size> midi_input( const string& midi_filename )
     "synthesizer processes data",
     [&] {
       while ( midi_processor.has_event() ) {
-        ret_mat( num_notes ) = midi_processor.pop_event();
-        num_notes++;
+        uint8_t event_type = midi_processor.get_event_type();
+        float time_val = midi_processor.pop_event()/1000.0;
+        if (event_type == 144) {
+          ret_mat( num_notes ) = time_val;
+          cout << "time val: " << time_val << "\n";
+          num_notes++;
+        }
       }
     },
     /* when should this rule run? */
@@ -100,7 +105,7 @@ void program_body( const string& midi_filename )
 
   int tempo = 50;
   float offset = 0;
-  for ( tempo = 70; tempo > 50; tempo-- ) {
+  for ( tempo = 80; tempo > 59; tempo-- ) {
     /* test true function */
     int i = 0;
     while ( true ) {
