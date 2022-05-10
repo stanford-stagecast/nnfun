@@ -40,6 +40,15 @@ public:
     assert( layerNum == 0 );
     return layer0.getNumParams();
   }
+ 
+  void modifyParam(const unsigned int layerNum, const unsigned int paramNum, T newVal) {
+    if (layerNum > 0) {
+      next.modifyParam(layerNum - 1, paramNum, newVal);
+      return;
+    }
+    assert(layerNum == 0);
+    layer0.modifyParam(paramNum, newVal);
+  } 
 
   T getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
   {
@@ -134,6 +143,11 @@ public:
     assert( layerNum == 0 );
     (void)layerNum;
     return layer0.getNumParams();
+  }
+ 
+  void modifyParam(const unsigned int layerNum, const unsigned int paramNum, T newVal) {
+    assert( layerNum == 0);
+    layer0.modifyParam(paramNum, newVal);
   }
 
   T getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )

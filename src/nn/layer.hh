@@ -80,6 +80,11 @@ public:
   unsigned int getNumParams() const { return ( input_size + 1 ) * output_size; }
   unsigned int getInputSize() const { return input_size; }
   unsigned int getOutputSize() const { return output_size; }
+ 
+  void modifyParam(const unsigned int paramNum, T newVal)
+  {
+    cout << paramNum << " " << newVal << endl;
+  }
 
   T getEvaluatedGradient( const unsigned int paramNum )
   {

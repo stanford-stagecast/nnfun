@@ -62,19 +62,21 @@ void program_body(Matrix<float, batch_size, input_size> input, Matrix<float, bat
      loss += loss_function(nn->output()(0,i), ground_truth_output(0,i));
    }
 
-   decltype(nn.get()) temp = nn.get();
+   //decltype(nn.get()) temp = nn.get();
    for (auto i = 0; i < (int)nn->getNumLayers(); i++) {
      cout << "i: " << i << endl;
      
-     for (auto j = 0; j < (int)temp->getNumParams(i); j++) {
+     for (auto j = 0; j < (int)nn->getNumParams(i); j++) {
        // weights
-       if (j < (int)temp->getLayerInputSize(i)) {
-         temp->layer0.weights()(j) -= learning_rate * pd_loss_wrt_output * temp->getEvaluatedGradient(i,j);
-       }
+       //if (j < (int)nn->getLayerInputSize(i)) {
+         //temp->layer0.weights()(j) -= learning_rate * pd_loss_wrt_output * temp->getEvaluatedGradient(i,j);
+         nn->modifyParam((unsigned int)i, j, learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient(i,j));
+       //}
        //biase
-       else {
-         temp->layer0.biases()(j - (int)temp->getLayerInputSize(i)) -= learning_rate * pd_loss_wrt_output * temp->getEvaluatedGradient(i,j);
-       }
+       //else {
+         //temp->layer0.biases()(j - (int)temp->getLayerInputSize(i)) -= learning_rate * pd_loss_wrt_output * temp->getEvaluatedGradient(i,j);
+         //nn->modifyParam()
+       //}
      }
      //temp = reinterpret_cast<decltype(temp->next)> (temp->next);
    }
