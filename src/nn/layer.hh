@@ -80,10 +80,17 @@ public:
   unsigned int getNumParams() const { return ( input_size + 1 ) * output_size; }
   unsigned int getInputSize() const { return input_size; }
   unsigned int getOutputSize() const { return output_size; }
- 
-  void modifyParam(const unsigned int paramNum, T newVal)
+
+  void modifyParam( const unsigned int paramNum, T newVal )
   {
-    cout << paramNum << " " << newVal << endl;
+    // cout << paramNum << " " << newVal << endl;
+    const unsigned int i = paramNum / output_size;
+    const unsigned int j = paramNum % output_size;
+    if ( i < input_size ) {
+      weights_( i, j ) = newVal;
+    } else {
+      biases_( 0, j ) = newVal;
+    }
   }
 
   T getEvaluatedGradient( const unsigned int paramNum )
