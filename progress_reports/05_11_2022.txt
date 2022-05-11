@@ -1,0 +1,7 @@
+Before Hackathon:
+- The goal for today's hackathon:
+  Jamie: Create the class for the nn.
+
+During Hackathon:
+
+After Hackathon:
