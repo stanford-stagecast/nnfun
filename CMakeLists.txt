@@ -22,3 +22,5 @@ add_subdirectory ("${PROJECT_SOURCE_DIR}/src/audio")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/frontend")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/tests")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/src/nn")
+
+add_subdirectory ("${PROJECT_SOURCE_DIR}/src/frontend/linear_predictor")

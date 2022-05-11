@@ -14,12 +14,7 @@ class MidiProcessor
   std::chrono::steady_clock::time_point last_event_time_ { std::chrono::steady_clock::now() };
 
 public:
-  void read_from_fd( FileDescriptor& fd )
-  {
-    unprocessed_midi_bytes_.push_from_fd( fd );
-
-    pop_active_sense_bytes();
-  };
+  void read_from_fd( FileDescriptor& fd );
 
   unsigned int pop_event()
   {

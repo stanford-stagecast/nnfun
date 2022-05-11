@@ -10,7 +10,6 @@ add_test_exec (back_propagation_formula_check)
 add_test_exec (back_propagation)
 # add_executable (neuralnetwork "neuralnetwork.cc")
 
-add_subdirectory ("./linear_predictor")
 add_test_exec (first_step_16_inputs)
 add_test_exec (predict_tempo_no_noise)
 add_test_exec (predict_tempo_with_noise)
