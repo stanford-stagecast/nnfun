@@ -49,44 +49,7 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, float offset )
   return ret_mat;
 }
 
-/* create input vector from midi data */
-Matrix<float, batch_size, input_size> midi_input( const string& midi_filename )
-{
-  FileDescriptor piano { CheckSystemCall( midi_filename, open( midi_filename.c_str(), O_RDONLY ) ) };
-  MidiProcessor midi_processor {};
-  midi_processor.reset_time();
-  auto event_loop = make_shared<EventLoop>();
-  size_t num_notes = 0;
 
-  Matrix<float, batch_size, input_size> ret_mat;
-
-  /* rule #1: read events from MIDI piano */
-  event_loop->add_rule( "read MIDI data", piano, Direction::In, [&] { midi_processor.read_from_fd( piano ); } );
-
-  /* rule #2: add MIDI data to matrix */
-  event_loop->add_rule(
-    "synthesizer processes data",
-    [&] {
-      while ( midi_processor.has_event() ) {
-        uint8_t event_type = midi_processor.get_event_type();
-        float time_val = midi_processor.pop_event()/1000.0;
-        if (event_type == 144) {
-          ret_mat( num_notes ) = time_val;
-          cout << "time val: " << time_val << "\n";
-          num_notes++;
-        }
-      }
-    },
-    /* when should this rule run? */
-    [&] { return midi_processor.has_event(); } );
-
-  while ( event_loop->wait_next_event( 5 ) != EventLoop::Result::Exit ) {
-    if ( num_notes >= 16 )
-      break;
-  }
-
-  return ret_mat;
-}
 
 float learning_rate = 0.00001;
 
@@ -184,8 +147,14 @@ void program_body( const string& midi_filename )
     }
   }
 
+  MidiProcessor midi_processor{};
   /* Take in midi input */
-  Matrix<float, batch_size, input_size> input = midi_input( midi_filename );
+  queue<float> queue_input = midi_processor.nn_midi_input( midi_filename );
+  Matrix<float, batch_size, input_size> input;
+  for ( auto i = 0; i < 16; i++ ) {
+    input( i ) = queue_input.front();
+    queue_input.pop();
+  }
 
   nn->apply( input );
   cout << nn->output()( 0, 0 ) << endl;

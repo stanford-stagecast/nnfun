@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <optional>
+#include <queue>
+#include <string>
 
 #include "file_descriptor.hh"
 #include "ring_buffer.hh"
@@ -10,30 +12,19 @@
 class MidiProcessor
 {
   RingBuffer unprocessed_midi_bytes_ { 4096 };
+  const static size_t batch_size = 1;
+  const static size_t input_size = 16;
 
   std::chrono::steady_clock::time_point last_event_time_ { std::chrono::steady_clock::now() };
 
 public:
+  std::queue<float> nn_midi_input( const std::string& midi_filename );
+
   void read_from_fd( FileDescriptor& fd );
 
-  unsigned int pop_event()
-  {
-    while ( unprocessed_midi_bytes_.readable_region().size() >= 3 ) {
-      unprocessed_midi_bytes_.pop( 3 );
-      pop_active_sense_bytes();
-    }
-    return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now()
-                                                                  - last_event_time_ )
-      .count();
-  };
+  unsigned int pop_event();
 
-  void pop_active_sense_bytes()
-  {
-    while ( unprocessed_midi_bytes_.readable_region().size()
-            and uint8_t( unprocessed_midi_bytes_.readable_region().at( 0 ) ) == 0xfe ) {
-      unprocessed_midi_bytes_.pop( 1 );
-    }
-  }
+  void pop_active_sense_bytes();
 
   bool want_read() const { return unprocessed_midi_bytes_.writable_region().size() > 0; }
 
