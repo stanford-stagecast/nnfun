@@ -87,9 +87,9 @@ public:
     const unsigned int i = paramNum / output_size;
     const unsigned int j = paramNum % output_size;
     if ( i < input_size ) {
-      weights_( i, j ) = newVal;
+      weights_( i, j ) -= newVal;
     } else {
-      biases_( 0, j ) = newVal;
+      biases_( 0, j ) -= newVal;
     }
   }
 
