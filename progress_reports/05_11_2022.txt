@@ -3,5 +3,13 @@ Before Hackathon:
   Jamie: Create the class for the nn.
 
 During Hackathon:
+Successfully linking the neural network to the physical piano.
+The player inputs exactly 16 keys and the piano can output the prediction result
+of the tempo of 16 predicted keys.
 
 After Hackathon:
+Jamie has finished the first step of the abstraction of the neural network.
+Things might need to fix:
+  - When computing total pd_loss_wrt_output, assuming batch_size = 1.
+  - Not supporting dynamic learning rate.
+  - Performing one iteration. Users need to use for-loop on their own.

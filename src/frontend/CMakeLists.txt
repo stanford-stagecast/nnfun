@@ -18,4 +18,4 @@ add_test_exec (predict_tempo_with_noise)
 add_test_exec (predict_inverse_x_two_layers_1)
 add_test_exec (predict_inverse_x_one_layer_1)
 add_test_exec (multi_layer_nn_template)
-
+add_test_exec (test_new_class)
