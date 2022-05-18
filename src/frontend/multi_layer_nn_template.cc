@@ -57,10 +57,10 @@ void program_body( Matrix<float, batch_size, input_size> input,
 
     const float pd_loss_wrt_output
       = compute_pd_loss_wrt_output( ground_truth_output( 0, 0 ), nn->output()( 0, 0 ) );
-    //float loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
+    // float loss = loss_function( nn->output()( 0, 0 ), ground_truth_output( 0, 0 ) );
 
     for ( auto i = 0; i < (int)nn->getNumLayers(); i++ ) {
-      //cout << "i: " << i << endl;
+      // cout << "i: " << i << endl;
 
       for ( auto j = 0; j < (int)nn->getNumParams( i ); j++ ) {
         nn->modifyParam(
@@ -68,9 +68,9 @@ void program_body( Matrix<float, batch_size, input_size> input,
       }
     }
   }
-  input(0,0) = 3.0;
-  nn->apply(input);
-  cout << "result: " << nn->output()(0,0) << endl;
+  input( 0, 0 ) = 3.0;
+  nn->apply( input );
+  cout << "result: " << nn->output()( 0, 0 ) << endl;
   nn->print();
 }
 

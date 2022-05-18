@@ -32,7 +32,8 @@ constexpr size_t batch_size = 1;
 constexpr size_t input_size = 16;
 constexpr size_t output_size = 1;
 
-void program_body(){
+void program_body()
+{
   // num_layer = 2
   // batch_size = 1
   // input_size = 6
@@ -47,14 +48,12 @@ void program_body(){
   Matrix<float, batch_size, output_size> ground_truth_output;
   input = Matrix<float, 1, 16>::Random();
   ground_truth_output << 40;
-  nn->apply(input);
-  cout << nn->get_output()(0,0) << endl; 
-  nn->gradient_descent(input, ground_truth_output, 0.0001);
- 
+  nn->apply( input );
+  cout << nn->get_output()( 0, 0 ) << endl;
+  nn->gradient_descent( input, ground_truth_output, 0.0001 );
+
   nn->print();
 }
-
-
 
 int main( int argc, char*[] )
 {
