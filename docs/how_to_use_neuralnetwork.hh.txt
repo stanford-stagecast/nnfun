@@ -1,0 +1,38 @@
+Available functions:
+1) ctor:
+   Note that th order of inputs to the template is as following:
+   - class T (always float in our project)
+   - number of layers excluding the last layer
+   - batch_size (always 1 so far)
+   - input_size
+   - output_size
+   - all number of nodes of layers except the first one (last layer also included)
+   For example, if want to declare a nn with layers:
+                   16 -> 16 -> 1
+   Number of layers is 2;
+   input_size = 16;
+   output_size = 1;
+   `rest` is inputed as 16, 1.
+
+2) initialize():
+   Initialize the neural network. Default is random initialization.
+
+3) 4 getters:
+   - get_num_of_layers
+   - get-input_size
+   - get_output_size
+   - get_output  This getter returns the Matrix containing the output of the nn.
+                 Note that need to apply(input) first.
+
+4) print():
+   Same as Network::print().
+
+5) apply(input):
+   Apply the input to the nn with the current weights and biases.
+   Same as Network::apply().
+
+6) gradient_descent(input, ground_truth_output, learning_rate):
+   Conducting the gradient descent process to the nn.
+   Currently not doing dynamic learning rate.
+
+One use case is in src/frontend/test_new_class.cc.
