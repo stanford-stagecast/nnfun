@@ -1,0 +1,9 @@
+During hackathon:
+- Makeing learning_rate a field variable -> dynamic learning rate.
+- Input array instead of hand-input layers (specifially rest).
+- Discussed some project ideas.
+- Tested abstraction with linear predictor, success.
+- Tested abstraction with 1/x, nan. Probably dynamic learning rate is needed.
+
+After hackathon:
+Jamie will work on dynamic learning rate.
