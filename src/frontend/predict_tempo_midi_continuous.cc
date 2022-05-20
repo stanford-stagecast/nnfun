@@ -14,6 +14,7 @@
 #include <random>
 #include <utility>
 #include <queue>
+#include <chrono>
 
 #include "eventloop.hh"
 
@@ -29,6 +30,7 @@ using namespace Eigen;
 
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 16;
+constexpr long time_offset = 1653036000;
 
 /* use squared error as loss function */
 float loss_function( const float target, const float actual )
@@ -43,11 +45,15 @@ float compute_pd_loss_wrt_output( const float target, const float actual )
 }
 
 /* compute input */
-Matrix<float, batch_size, input_size> gen_time( float tempo, float offset )
+Matrix<float, batch_size, input_size> gen_time( float spb, float offset )
 {
+  auto current_time = std::chrono::system_clock::now();
+  auto duration_in_seconds = std::chrono::duration<double>(current_time.time_since_epoch());
+
+  float curr_time_secs = duration_in_seconds.count() - time_offset;
   Matrix<float, batch_size, input_size> ret_mat;
   for ( auto i = 0; i < 16; i++ ) {
-    ret_mat( i ) = (tempo) * i + offset;
+    ret_mat( i ) = curr_time_secs - (spb * i + offset);
   }
   //cout << ret_mat << endl;
   return ret_mat;
@@ -72,23 +78,22 @@ void program_body( const string& midi_filename )
   }
   nn->layer0.biases()( 0 ) = 0;
   */
-  float tempo = 50.0;
   float offset = 0;
   for( int run = 0; run < 2000; run++){
-  for ( int tempo_int = 20; tempo_int < 250; tempo_int++ ) {
+  for ( int tempo_int = 20; tempo_int < 200; tempo_int++ ) {
     /* test true function */
     //float tempo_int_perturb = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/4));
     //tempo = 60.0/(tempo_int + tempo_int_perturb);
-    tempo = 60.0/tempo_int;
+    float spb = 60.0/tempo_int;
     int i = 0;
     while ( true ) {
       if ( i == 1 )
         break;
       i += 1;
-      //float rand_offset = 0;
-      float rand_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/5));
+      float rand_offset = 0;
+      //float rand_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/5));
       /* step 1: construct a unique problem instance */
-      Matrix<float, batch_size, input_size> input = gen_time( tempo, offset + rand_offset );
+      Matrix<float, batch_size, input_size> input = gen_time( spb, offset + rand_offset );
 
       /* step 2: forward propagate and calculate loss functiom */
       nn->apply( input );
@@ -99,14 +104,14 @@ void program_body( const string& midi_filename )
       nn->computeDeltas();
       nn->evaluateGradients( input );
 
-      const float pd_loss_wrt_output = compute_pd_loss_wrt_output( tempo, nn->output()( 0, 0 ) );
+      const float pd_loss_wrt_output = compute_pd_loss_wrt_output( spb, nn->output()( 0, 0 ) );
 
       // TODO: static eta -> dynamic eta
       auto four_third_lr = 4.0 / 3 * learning_rate;
       auto two_third_lr = 2.0 / 3 * learning_rate;
 
       /* calculate three loss */
-      float current_loss = loss_function( nn->output()( 0, 0 ), tempo );
+      float current_loss = loss_function( nn->output()( 0, 0 ), spb );
       Matrix<float, input_size, 1> current_weights;
       for ( int j = 0; j < 16; j++ ) {
         current_weights( j ) = nn->layer0.weights()( j );
@@ -119,7 +124,7 @@ void program_body( const string& midi_filename )
       }
       nn->layer0.biases()( 0 ) -= four_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
       nn->apply( input );
-      auto loss_four_third_lr = loss_function( nn->output()( 0, 0 ), tempo );
+      auto loss_four_third_lr = loss_function( nn->output()( 0, 0 ), spb );
 
       /* loss for 2/3 eta */
       for ( int j = 0; j < 16; j++ ) {
@@ -129,7 +134,7 @@ void program_body( const string& midi_filename )
       nn->layer0.biases()( 0 )
         = current_biase - two_third_lr * pd_loss_wrt_output * nn->getEvaluatedGradient( 0, 16 );
       nn->apply( input );
-      auto loss_two_third_lr = loss_function( nn->output()( 0, 0 ), tempo );
+      auto loss_two_third_lr = loss_function( nn->output()( 0, 0 ), spb );
 
       //cout << current_loss << " " << loss_four_third_lr << " " << loss_two_third_lr << endl;
       auto min_loss = min( min( current_loss, loss_four_third_lr ), loss_two_third_lr );
@@ -160,50 +165,63 @@ void program_body( const string& midi_filename )
     }
   }
   }
-  FileDescriptor piano { CheckSystemCall( midi_filename, open( midi_filename.c_str(), O_RDONLY ) ) };
-  MidiProcessor midi_processor {};
-  midi_processor.reset_time();
-  auto event_loop = make_shared<EventLoop>();
-  size_t num_notes = 0;
+  
 
-  Matrix<float, batch_size, input_size> ret_mat;
-
-  for (size_t i = 0; i < 16; i++) {
-    ret_mat( i ) = 0;
+  for ( int i = 20; i < 400; i++ ) {
+    //float test_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/2));
+    Matrix<float, batch_size, input_size> input = gen_time( 60.0/i, 0 );
+    nn->apply( input );
+    cout << "input: " << i << " matrix: " << input << " output: " << 60.0/nn->output()( 0, 0 ) << endl;
+    // cout << 60/nn->output()( 0, 0 ) << endl;
+    // cout << i << endl;
   }
 
-  /* rule #1: read events from MIDI piano */
-  event_loop->add_rule( "read MIDI data", piano, Direction::In, [&] { midi_processor.read_from_fd( piano ); } );
+  cout << midi_filename << endl;
 
-  /* rule #2: add MIDI data to matrix */
-  event_loop->add_rule(
-    "synthesizer processes data",
-    [&] {
-      while ( midi_processor.has_event() ) {
-        uint8_t event_type = midi_processor.get_event_type();
-        float time_val = midi_processor.pop_event()/1000.0;
-        if (event_type == 144) {
-          if (num_notes < 16) {
-            ret_mat( num_notes ) = time_val;
-            cout << "time val: " << time_val << "\n";
-            num_notes++;
-          } else {
-            for (size_t i = 0; i < 15; i++) {
-              ret_mat( i ) = ret_mat( i + 1 );
-            }
-            ret_mat( 15 ) = time_val;
-          }
-          nn->apply( ret_mat );
-          cout << "prediction: " << 60/(nn->output()( 0, 0 )) << endl;
+  // FileDescriptor piano { CheckSystemCall( midi_filename, open( midi_filename.c_str(), O_RDONLY ) ) };
+  // MidiProcessor midi_processor {};
+  // midi_processor.reset_time();
+  // auto event_loop = make_shared<EventLoop>();
+  // size_t num_notes = 0;
+
+  // Matrix<float, batch_size, input_size> ret_mat;
+
+  // for (size_t i = 0; i < 16; i++) {
+  //   ret_mat( i ) = 0;
+  // }
+
+  // /* rule #1: read events from MIDI piano */
+  // event_loop->add_rule( "read MIDI data", piano, Direction::In, [&] { midi_processor.read_from_fd( piano ); } );
+
+  // /* rule #2: add MIDI data to matrix */
+  // event_loop->add_rule(
+  //   "synthesizer processes data",
+  //   [&] {
+  //     while ( midi_processor.has_event() ) {
+  //       uint8_t event_type = midi_processor.get_event_type();
+  //       float time_val = midi_processor.pop_event()/1000.0;
+  //       if (event_type == 144) {
+  //         if (num_notes < 16) {
+  //           ret_mat( num_notes ) = time_val;
+  //           cout << "time val: " << time_val << "\n";
+  //           num_notes++;
+  //         } else {
+  //           for (size_t i = 0; i < 15; i++) {
+  //             ret_mat( i ) = ret_mat( i + 1 );
+  //           }
+  //           ret_mat( 15 ) = time_val;
+  //         }
+  //         nn->apply( ret_mat );
+  //         cout << "prediction: " << 60/(nn->output()( 0, 0 )) << endl;
           
-        }
-      }
-    },
-    /* when should this rule run? */
-    [&] { return midi_processor.has_event(); } );
+  //       }
+  //     }
+  //   },
+  //   /* when should this rule run? */
+  //   [&] { return midi_processor.has_event(); } );
 
-  while ( event_loop->wait_next_event( 5 ) != EventLoop::Result::Exit ) {
-  }
+  // while ( event_loop->wait_next_event( 5 ) != EventLoop::Result::Exit ) {
+  // }
 
 
 }
