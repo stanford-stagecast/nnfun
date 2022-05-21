@@ -14,6 +14,7 @@
 #include <random>
 #include <utility>
 #include <queue>
+#include <deque>
 #include <chrono>
 
 #include "eventloop.hh"
@@ -30,7 +31,7 @@ using namespace Eigen;
 
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 16;
-constexpr long time_offset = 1653036000;
+// constexpr long time_offset = 1653036000;
 
 /* use squared error as loss function */
 float loss_function( const float target, const float actual )
@@ -47,13 +48,25 @@ float compute_pd_loss_wrt_output( const float target, const float actual )
 /* compute input */
 Matrix<float, batch_size, input_size> gen_time( float spb, float offset )
 {
+  Matrix<float, batch_size, input_size> ret_mat;
+  for ( auto i = 0; i < 16; i++ ) {
+    ret_mat( 15 - i ) = (spb) * i + offset;
+  }
+  //cout << ret_mat << endl;
+  return ret_mat;
+}
+
+/* compute input */
+Matrix<float, batch_size, input_size> calculate_input( deque<float> times )
+{
   auto current_time = std::chrono::system_clock::now();
   auto duration_in_seconds = std::chrono::duration<double>(current_time.time_since_epoch());
 
-  float curr_time_secs = duration_in_seconds.count() - time_offset;
+  float curr_time_secs = duration_in_seconds.count();
+  
   Matrix<float, batch_size, input_size> ret_mat;
   for ( auto i = 0; i < 16; i++ ) {
-    ret_mat( i ) = curr_time_secs - (spb * i + offset);
+    ret_mat( i ) = curr_time_secs - times[i];
   }
   //cout << ret_mat << endl;
   return ret_mat;
@@ -90,8 +103,8 @@ void program_body( const string& midi_filename )
       if ( i == 1 )
         break;
       i += 1;
-      float rand_offset = 0;
-      //float rand_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/5));
+      // float rand_offset = 0;
+      float rand_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/5));
       /* step 1: construct a unique problem instance */
       Matrix<float, batch_size, input_size> input = gen_time( spb, offset + rand_offset );
 
@@ -168,8 +181,8 @@ void program_body( const string& midi_filename )
   
 
   for ( int i = 20; i < 400; i++ ) {
-    //float test_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/2));
-    Matrix<float, batch_size, input_size> input = gen_time( 60.0/i, 0 );
+    float test_offset = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/2));
+    Matrix<float, batch_size, input_size> input = gen_time( 60.0/i, test_offset );
     nn->apply( input );
     cout << "input: " << i << " matrix: " << input << " output: " << 60.0/nn->output()( 0, 0 ) << endl;
     // cout << 60/nn->output()( 0, 0 ) << endl;
