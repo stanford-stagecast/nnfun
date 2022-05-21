@@ -1,7 +1,7 @@
 #include "midi_processor.hh"
-#include <fcntl.h>
-#include "exception.hh"
 #include "eventloop.hh"
+#include "exception.hh"
+#include <fcntl.h>
 #include <iostream>
 
 using namespace std;
@@ -14,24 +14,23 @@ void MidiProcessor::read_from_fd( FileDescriptor& fd )
   pop_active_sense_bytes();
 }
 
-
 unsigned int MidiProcessor::pop_event()
 {
-    while ( unprocessed_midi_bytes_.readable_region().size() >= 3 ) {
-        unprocessed_midi_bytes_.pop( 3 );
-        pop_active_sense_bytes();
-    }
-    return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now()
-                                                                    - last_event_time_ )
-        .count();
+  while ( unprocessed_midi_bytes_.readable_region().size() >= 3 ) {
+    unprocessed_midi_bytes_.pop( 3 );
+    pop_active_sense_bytes();
+  }
+  return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now()
+                                                                - last_event_time_ )
+    .count();
 }
 
 void MidiProcessor::pop_active_sense_bytes()
 {
-    while ( unprocessed_midi_bytes_.readable_region().size()
-            and uint8_t( unprocessed_midi_bytes_.readable_region().at( 0 ) ) == 0xfe ) {
-      unprocessed_midi_bytes_.pop( 1 );
-    }
+  while ( unprocessed_midi_bytes_.readable_region().size()
+          and uint8_t( unprocessed_midi_bytes_.readable_region().at( 0 ) ) == 0xfe ) {
+    unprocessed_midi_bytes_.pop( 1 );
+  }
 }
 
 /* create input vector from midi data */
@@ -53,9 +52,9 @@ std::queue<float> MidiProcessor::nn_midi_input( const string& midi_filename )
     [&] {
       while ( has_event() ) {
         uint8_t event_type = get_event_type();
-        float time_val = pop_event()/1000.0;
-        if (event_type == 144) {
-          ret_queue.push(time_val);
+        float time_val = pop_event() / 1000.0;
+        if ( event_type == 144 ) {
+          ret_queue.push( time_val );
           cout << "time val: " << time_val << "\n";
           num_notes++;
         }
