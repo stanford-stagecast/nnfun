@@ -31,8 +31,9 @@ Available functions:
    Apply the input to the nn with the current weights and biases.
    Same as Network::apply().
 
-6) gradient_descent(input, ground_truth_output, learning_rate):
+6) gradient_descent(input, ground_truth_output, dynamic):
    Conducting the gradient descent process to the nn.
-   Currently not doing dynamic learning rate.
+   If `dynamic` is set to true, then the neuralnetwork will use dynamic eta;
+   otherwise eta is default to 0.001.
 
-One use case is in src/frontend/test_new_class.cc.
+Two use cases are in src/frontend/test_new_class.cc and predict_inverse_256.cc.

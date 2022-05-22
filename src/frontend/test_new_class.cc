@@ -51,10 +51,10 @@ void program_body()
   ground_truth_output << 10;
   // nn->apply( input );
   // cout << nn->get_output()( 0, 0 ) << endl;
-  for ( int i = 0; i < 1000; i++ ) {
+  for ( int i = 0; i < 100000; i++ ) {
     input( 0, 0 ) = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) );
     ground_truth_output( 0, 0 ) = 3 * input( 0, 0 ) + 1;
-    nn->gradient_descent( input, ground_truth_output, 0.1 );
+    nn->gradient_descent( input, ground_truth_output, true );
   }
 
   nn->print();

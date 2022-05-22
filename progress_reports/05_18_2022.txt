@@ -7,3 +7,10 @@ During hackathon:
 
 After hackathon:
 Jamie will work on dynamic learning rate.
+
+[Update on 05_21]:
+Dynamic learnign rate is added to the nn.
+Current status:
+The new abstraction works with linear predictors.
+The new abstraction is able to predict 1/x in range [1,20] if training on random
+float values in range [1,20] with 100000 iterations.

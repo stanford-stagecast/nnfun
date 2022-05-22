@@ -21,9 +21,9 @@ void program_body()
   // output_size = 1
   // 16 -> 16 -> 1
   // 2 1 16 1 16 1
-  auto nn = make_unique<NeuralNetwork<float, num_layers, batch_size, input_size, output_size, 30, 2560, 10, output_size>>();
+  auto nn = make_unique<
+    NeuralNetwork<float, num_layers, batch_size, input_size, output_size, 30, 2560, 10, output_size>>();
   nn->initialize();
-  nn->print();
 
   Matrix<float, batch_size, input_size> input;
   Matrix<float, batch_size, output_size> ground_truth_output;
@@ -32,18 +32,20 @@ void program_body()
   ground_truth_output << 1.0 / 3;
   // nn->apply( input );
   // cout << nn->get_output()( 0, 0 ) << endl;
-  for ( int i = 0; i < 1000; i++ ) {
+  for ( int i = 0; i < 100000; i++ ) {
     input( 0, 0 ) = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 20 + 1;
     ground_truth_output( 0, 0 ) = 1.0 / input( 0, 0 );
-    nn->gradient_descent( input, ground_truth_output, 0.1 );
+    nn->gradient_descent( input, ground_truth_output, true );
   }
 
-  nn->print();
-  input( 0, 0 ) = 5;
-  nn->apply( input );
-  cout << nn->get_output()( 0, 0 ) << endl;
+  // nn->print();
+  //  testing
+  for ( int i = 1; i < 21; i++ ) {
+    input( 0, 0 ) = (float)i;
+    nn->apply( input );
+    cout << i << " -> " << nn->get_output()( 0, 0 ) << endl;
+  }
 }
-
 
 int main( int argc, char*[] )
 {
