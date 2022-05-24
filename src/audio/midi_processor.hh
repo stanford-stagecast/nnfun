@@ -22,7 +22,7 @@ public:
 
   void read_from_fd( FileDescriptor& fd );
 
-  unsigned int pop_event();
+  float pop_event();
 
   void pop_active_sense_bytes();
 
@@ -37,4 +37,5 @@ public:
   // unsigned int pop_event();
 
   void reset_time() { last_event_time_ = std::chrono::steady_clock::now(); };
+  std::chrono::steady_clock::time_point get_original_time() { return last_event_time_; };
 };

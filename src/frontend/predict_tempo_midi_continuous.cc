@@ -59,12 +59,12 @@ Matrix<float, batch_size, input_size> gen_time( float spb, float offset )
 }
 
 /* compute input */
-Matrix<float, batch_size, input_size> calculate_input( deque<float> times, int num_notes )
+Matrix<float, batch_size, input_size> calculate_input( deque<float> times, int num_notes, std::chrono::steady_clock::time_point base_time )
 {
-  auto current_time = std::chrono::system_clock::now();
-  auto duration_in_seconds = std::chrono::duration<double>( current_time.time_since_epoch() );
-
-  float curr_time_secs = duration_in_seconds.count();
+  float curr_time_secs = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now()
+                                                                - base_time )
+    .count()/1000.0;
+  //cout << std::fixed << "curr_time: " << curr_time_secs << "\n";
 
   Matrix<float, batch_size, input_size> ret_mat;
   for ( auto i = 0; i < 16; i++ ) {
@@ -74,7 +74,7 @@ Matrix<float, batch_size, input_size> calculate_input( deque<float> times, int n
       ret_mat( i ) = curr_time_secs - times[i];
     }
   }
-  // cout << ret_mat << endl;
+  cout << ret_mat << endl;
   return ret_mat;
 }
 
@@ -191,61 +191,62 @@ void program_body( const string& midi_filename )
     }
   }
 
-  // FileDescriptor piano { CheckSystemCall( midi_filename, open( midi_filename.c_str(), O_RDONLY ) ) };
-  // MidiProcessor midi_processor {};
-  // midi_processor.reset_time();
-  // auto event_loop = make_shared<EventLoop>();
-  // deque<float> press_queue {};
-  // int num_notes = 0;
+  FileDescriptor piano { CheckSystemCall( midi_filename, open( midi_filename.c_str(), O_RDONLY ) ) };
+  MidiProcessor midi_processor {};
+  midi_processor.reset_time();
+  std::chrono::steady_clock::time_point base_time = midi_processor.get_original_time();
+  auto event_loop = make_shared<EventLoop>();
+  deque<float> press_queue {};
+  int num_notes = 0;
 
-  // Matrix<float, batch_size, input_size> ret_mat;
+  Matrix<float, batch_size, input_size> ret_mat;
 
   /* rule #1: read events from MIDI piano */
-  // event_loop->add_rule( "read MIDI data", piano, Direction::In, [&] { midi_processor.read_from_fd( piano ); } );
+  event_loop->add_rule( "read MIDI data", piano, Direction::In, [&] { midi_processor.read_from_fd( piano ); } );
 
-  // /* rule #2: add MIDI data to matrix */
-  // event_loop->add_rule(
-  //   "synthesizer processes data",
-  //   [&] {
-  //     while ( midi_processor.has_event() ) {
-  //       uint8_t event_type = midi_processor.get_event_type();
-  //       float time_val = midi_processor.pop_event() / 1000.0;
-  //       if ( event_type == 144 ) {
-  //         if ( num_notes < 16 ) {
-  //           press_queue.push_back( time_val );
-  //           cout << "time val: " << time_val << "\n";
-  //           num_notes++;
-  //         } else {
-  //           press_queue.push_back( time_val );
-  //           press_queue.pop_front();
-  //         }
-  //         ret_mat = calculate_input( press_queue, num_notes );
-  //         nn->apply( ret_mat );
-  //         cout << "prediction: " << 60 / ( nn->output()( 0, 0 ) ) << endl;
-  //       }
-  //     }
-  //   },
-  //   /* when should this rule run? */
-  //   [&] { return midi_processor.has_event(); } );
+  /* rule #2: add MIDI data to matrix */
+  event_loop->add_rule(
+    "synthesizer processes data",
+    [&] {
+      while ( midi_processor.has_event() ) {
+        uint8_t event_type = midi_processor.get_event_type();
+        float time_val = midi_processor.pop_event() / 1.0;
+        if ( event_type == 144 ) {
+          if ( num_notes < 16 ) {
+            press_queue.push_back( time_val );
+            cout << std::fixed << "time val: " << time_val << "\n";
+            num_notes++;
+          } else {
+            press_queue.push_back( time_val );
+            press_queue.pop_front();
+          }
+          ret_mat = calculate_input( press_queue, num_notes, base_time );
+          nn->apply( ret_mat );
+          cout << "prediction: " << 60 / ( nn->output()( 0, 0 ) ) << endl;
+        }
+      }
+    },
+    /* when should this rule run? */
+    [&] { return midi_processor.has_event(); } );
 
-  // while ( event_loop->wait_next_event( 5 ) != EventLoop::Result::Exit ) {
-  // }
-
-
-  for ( int i = 20; i < 400; i++ ) {
-    float test_offset = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX / 5 ) );
-    Matrix<float, batch_size, input_size> input = gen_time( 60.0 / i, test_offset );
-    nn->apply( input );
-    cout << "input: " << i << " output: " << 60.0 / nn->output()( 0, 0 ) << endl;
-    // cout << nn->output()( 0, 0 ) << endl;
-    //  cout << i << endl;
-    
+  while ( event_loop->wait_next_event( 5 ) != EventLoop::Result::Exit ) {
   }
-  float test_offset = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX / 5 ) );
-    Matrix<float, batch_size, input_size> input = gen_time( 0, test_offset );
-    nn->apply( input );
-    cout << "input: " << 0 << " matrix: " << input << " output: " << 60.0 / nn->output()( 0, 0 ) << endl;
-  cout << midi_filename << "\n";
+
+
+  // for ( int i = 20; i < 400; i++ ) {
+  //   float test_offset = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX / 5 ) );
+  //   Matrix<float, batch_size, input_size> input = gen_time( 60.0 / i, test_offset );
+  //   nn->apply( input );
+  //   cout << "input: " << i << " output: " << 60.0 / nn->output()( 0, 0 ) << endl;
+  //   // cout << nn->output()( 0, 0 ) << endl;
+  //   //  cout << i << endl;
+    
+  // }
+  // float test_offset = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX / 5 ) );
+  //   Matrix<float, batch_size, input_size> input = gen_time( 0, test_offset );
+  //   nn->apply( input );
+  //   cout << "input: " << 0 << " matrix: " << input << " output: " << 60.0 / nn->output()( 0, 0 ) << endl;
+  // cout << midi_filename << "\n";
 }
 
 int main( int argc, char* argv[] )

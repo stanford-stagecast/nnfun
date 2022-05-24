@@ -14,7 +14,7 @@ void MidiProcessor::read_from_fd( FileDescriptor& fd )
   pop_active_sense_bytes();
 }
 
-unsigned int MidiProcessor::pop_event()
+float MidiProcessor::pop_event()
 {
   while ( unprocessed_midi_bytes_.readable_region().size() >= 3 ) {
     unprocessed_midi_bytes_.pop( 3 );
@@ -22,7 +22,7 @@ unsigned int MidiProcessor::pop_event()
   }
   return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now()
                                                                 - last_event_time_ )
-    .count();
+    .count()/1000.0;
 }
 
 void MidiProcessor::pop_active_sense_bytes()
