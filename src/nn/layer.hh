@@ -26,6 +26,8 @@ private:
   // matrix to store gradients w.r.t. biases
   Matrix<T, 1, output_size> grad_biases_ {};
 
+  // unsigned int numParam = (input_size + 1) * output_size;
+
 public:
   Layer() {}
 
@@ -90,6 +92,13 @@ public:
       weights_( i, j ) -= newVal;
     } else {
       biases_( 0, j ) -= newVal;
+    }
+  }
+
+  void modifyParamWholeLayer( const vector<T>& params )
+  {
+    for ( int paramNum = 0; paramNum < params.size(); paramNum++ ) {
+      modifyParam( (unsigned int)paramNum, params[paramNum] );
     }
   }
 
