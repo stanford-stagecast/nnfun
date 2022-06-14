@@ -1,3 +1,8 @@
+/**
+ * File name: layer.hh
+ * Last Update: June 2022
+ */
+
 #pragma once
 
 #include <Eigen/Dense>
@@ -6,6 +11,30 @@
 using namespace std;
 using namespace Eigen;
 
+/*
+ * Class Name: Layer
+ * Description: This class defines the behavior of the layer (atom component of
+ *              neural networks).
+ *              It stores the info of input size, output size, the weights and
+ *              biases.
+ *              It is able to apply user input and get the corresponding output.
+ *              It is able to compute delta and gradient.
+ *              It is able to perform back propagation (modifyParamWholeLyaer
+ *              and perturbWeight) indicated by the user.
+ *              It has a print function to visualize.
+ *
+ *              Currently the version only supports layer with number of weight
+ *              variables being input_size * output_size, and number of biase
+ *              variables being output_size.
+ *              Example: If there are x inputs to the layer, and the layer has
+ *                       y outputs, then there will be x*y weights, and y biases.
+ *
+ * Inputs:
+ *			1. T specifies the type of variables in the layer (usually float)
+ *			2. batch_size specifies the size of a batch (usually 1)
+ *			3. input_size specifies the size of input
+ *			4. output_size specifies the size of output
+ */
 template<class T, unsigned int batch_size, unsigned int input_size, unsigned int output_size>
 class Layer
 {
@@ -31,12 +60,24 @@ private:
 public:
   Layer() {}
 
+  /*
+   * Function Name: initializeWeightsRandomly
+   * Description: This function randomly assigns values in Matrix weights_ and
+   *			  Matrix biases_.
+   */
   void initializeWeightsRandomly()
   {
     weights_ = Matrix<T, input_size, output_size>::Random();
     biases_ = Matrix<T, 1, output_size>::Random();
   }
 
+  /*
+   * Function Name: apply
+   * Description: This function applys the input to the neuralnetwork.
+   *              The Matrix output_ will be updated.
+   * Parameters:
+   * 			1. input is the input to the layer
+   */
   void apply( const Matrix<T, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_ ).rowwise() + biases_;
@@ -49,6 +90,13 @@ public:
     output_ = unactivated_output_;
   }
 
+  /*
+   * Function Name: print
+   * Description: This function prints the basic info of the layer to stdout.
+   * Parameters:
+   *			1. layer_num specifies the position of current layer in the
+   *			   whole neural network (useful information in multi-layer nn)
+   */
   void print( const unsigned int layer_num ) const
   {
     const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
@@ -68,6 +116,14 @@ public:
     cout << "grad_biases:" << endl << grad_biases_.format( CleanFmt ) << endl << endl << endl;
   }
 
+  /*
+   * Function Name: perturbWeight
+   * Description: This function increments the parameter (either weight in Matrix
+   *              weights_ or biase in Matrix biases_) by amount epsilon.
+   * Parameters:
+   * 			1. weight_num specifies which parameter to be changed
+   *			2. epsilon is the amount to be incremented
+   */
   void perturbWeight( const unsigned int weight_num, const T epsilon )
   {
     const unsigned int i = weight_num / output_size;
@@ -79,16 +135,36 @@ public:
     }
   }
 
+  /* getter of number of parameter*/
   unsigned int getNumParams() const { return ( input_size + 1 ) * output_size; }
+  /* getter of input size */
   unsigned int getInputSize() const { return input_size; }
+  /* getter of output size */
   unsigned int getOutputSize() const { return output_size; }
 
+  /*
+   * Function Name: modifyParamWholeLayer
+   * Description: This function decrements all parameters including weights in
+   *		      Matrix weights_ and biases in Matrix biases_ by amount
+   *              (epsilon * the gradient calculated at the corresponding location).
+   * Parameters:
+   *			1. epsilon is the constant to be multiplied to the amount to be
+   *			   decremented
+   */
   void modifyParamWholeLayer( T epsilon )
   {
     weights_ -= grad_weights_ * epsilon;
     biases_ -= grad_biases_ * epsilon;
   }
 
+  /*
+   * Function Name: getEvaluatedGradient
+   * Description: This function returns the previously computed gradient of
+   *              the specified param.
+   * Parameters:
+   *			1. paramNum specifies which parameter to return the gradient
+   * Return Value: the gradient of type T (usually float)
+   */
   T getEvaluatedGradient( const unsigned int paramNum )
   {
     const unsigned int i = paramNum / output_size;

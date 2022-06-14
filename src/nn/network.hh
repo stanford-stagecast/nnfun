@@ -1,3 +1,8 @@
+/**
+ * Filename: network.hh
+ * Last Update: June 2022
+ */
+
 #pragma once
 
 #include "layer.hh"
@@ -5,33 +10,74 @@
 using namespace std;
 using namespace Eigen;
 
+/*
+ * Class Name: Network
+ * Description: This is the recursive class template of neural networks. It
+ *              creates layers specified by the user.
+ *              It is able to initialize all weights and biases randomly.
+ *              It is able to apply user input and get the corresponding output.
+ *              It is able to compute delta and gradient.
+ *              It has a print function which can beautifully print info.
+ *
+ * Inputs:
+ *			1. T specifies the type of variables in the network (usually float)
+ *			2. batch_size specifies the size of a batch (usually 1)
+ *			3. i0 specifies the input size of the first layer
+ *			4. o0 specifies the output size of the first layer | input size of
+ * 			   the second layer
+ *			5. rest... specifies the size of all of the later layers
+ */
+// RECURSIVE DEF
 template<class T, unsigned int batch_size, unsigned int i0, unsigned int o0, unsigned int... rest>
 class Network
 {
 public:
+  /* two ctors */
   Layer<T, batch_size, i0, o0> layer0 {};
   Network<T, batch_size, o0, rest...> next {};
 
   constexpr static unsigned int output_size = decltype( next )::output_size;
+
+  /*
+   * FunctionName: initializeWeightsRandomly
+   * Description: This function randomly recursively assigns values to all
+   *              parameters in the neural network.
+   */
   void initializeWeightsRandomly()
   {
     layer0.initializeWeightsRandomly();
     next.initializeWeightsRandomly();
   }
+
+  /*
+   * Function Name: aply
+   * Description: This function recursively applys the input to the neuralnetwork.
+   * Parameters:
+   *			1. input is the input to the neural network
+   */
   void apply( const Matrix<T, batch_size, i0>& input )
   {
     layer0.apply( input );
     next.apply( layer0.output() );
   }
 
+  /*
+   * Function Name: print
+   * Description: This function prints the basic info of the neural network to
+   *              stdout.
+   * Parameters:
+   *			1. layerNum specifies the position of the current layer to be
+   *			   printed (starts with 0 and increments each time)
+   */
   void print( const unsigned int layerNum = 0 ) const
   {
     layer0.print( layerNum );
     next.print( layerNum + 1 );
   }
 
+  /* getter of number of layers */
   unsigned int getNumLayers() const { return next.getNumLayers() + 1; }
-
+  /* getter of number of parameters in a specific layer */
   unsigned int getNumParams( const unsigned int layerNum ) const
   {
     if ( layerNum > 0 ) {
@@ -41,6 +87,14 @@ public:
     return layer0.getNumParams();
   }
 
+  /*
+   * Function Name: modifyParamWholeLayer
+   * Description: This function decrements all parameters by amount epsilon in
+   *              the specified layer. It recursively finds the layer.
+   * Parameters:
+   *			1. layerNum specifies which layer to be decrementd
+   *			2. epsilon is the constant to be decremented
+   */
   void modifyParamWholeLayer( const unsigned int layerNum, T epsilon )
   {
     if ( layerNum > 0 ) {
@@ -51,6 +105,15 @@ public:
     layer0.modifyParamWholeLayer( epsilon );
   }
 
+  /*
+   * Function Name: getEvaluatedGradient
+   * Description: This function returns the previously computed gradient of the
+   *              specified param in the specified layer.
+   * Parameters:
+   * 			1. layerNum specifies which layer
+   *			2. paramNum specifies which parameter
+   * Return Value: the gradient of type T (usually float)
+   */
   T getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
   {
     if ( layerNum > 0 ) {
@@ -90,6 +153,7 @@ public:
     return derivative.sum() / batch_size;
   }
 
+  /* getter of input size of the specified layer */
   unsigned int getLayerInputSize( const unsigned int layerNum ) const
   {
     if ( layerNum > 0 ) {
@@ -98,6 +162,7 @@ public:
     assert( layerNum == 0 );
     return layer0.getInputSize();
   }
+  /* getter of output size of the specified layer */
   unsigned int getLayerOutputSize( const unsigned int layerNum ) const
   {
     if ( layerNum > 0 ) {
@@ -122,6 +187,10 @@ public:
   const Matrix<T, batch_size, output_size>& output() const { return next.output(); }
 };
 
+/*
+ * Class Name: Network
+ * Description: This is the base case of the above recursive template.
+ */
 // BASE CASE
 template<class T, unsigned int batch_size, unsigned int i0, unsigned int o0>
 class Network<T, batch_size, i0, o0>

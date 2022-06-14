@@ -1,6 +1,8 @@
+/**
+ * Fila name: neuralnetwork.hh
+ * Last Update: June 2022
+ */
 #pragma once
-//#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Werror=effc++"
 
 #include "network.hh"
 
@@ -8,6 +10,14 @@
 
 using namespace std;
 using namespace Eigen;
+
+/*
+ * Class Name: NeuralNetwork
+ * Description: This class defines the behavior of the whole neural network.
+ *              It provides a randomly initialization function, forward
+ *              propagation, and backward propagation.
+ *              It provides a print function to visualize the whole neural network.
+ */
 
 // note that output_size need to be input twice,
 // once as output_size, once in rest
@@ -30,8 +40,6 @@ private:
     return ( target - actual ) * ( target - actual );
   }
 
-  // vector<num_>
-
 public:
   Network<T, batch_size, input_size, rest...>* nn {};
 
@@ -44,19 +52,46 @@ public:
 
   unsigned int get_current_learning_rate() { return learning_rate; }
 
-  // default: initialize weights and biases randomly
+  const Matrix<T, batch_size, output_size>& get_output() { return nn->output(); }
+
+  /*
+   * Function Name: initialize
+   * Description: This function initializes an object of Network class based on
+   *              user inputs. Then it randomly assigns values to all parameters
+   *              in the neural network.
+   */
   void initialize()
   {
     nn = new Network<T, batch_size, input_size, rest...>();
     nn->initializeWeightsRandomly();
   }
 
+  /*
+   * Function Name: print
+   * Description: This function prints the basic info of the whole neural network.
+   */
   void print() { nn->print(); }
 
+  /*
+   * Function Name: apply
+   * Description: This function applys the user input to the neural network.
+   * Parameters:
+   *			1. input is the input to the neural network
+   */
   void apply( const Matrix<T, batch_size, input_size>& input ) { nn->apply( input ); }
 
-  const Matrix<T, batch_size, output_size>& get_output() { return nn->output(); }
-
+  /*
+   * Function Name: gradient_descent
+   * Description: This function performs gradient descent based on the input
+   *              and the groundtruth output. User can truth whether to conduct
+   *              dynamic learning rate or not.
+   * Parameters:
+   *			1. input is the input used for gradient descent
+   *			2. ground_truth_output is the actual value used to compare with
+   *			   the predicted output in the loss function
+   *			3. dynamic is a boolean value stating whether to do dynamic
+   *			   learning rate or not
+   */
   void gradient_descent( Matrix<T, batch_size, input_size>& input,
                          Matrix<T, batch_size, output_size>& ground_truth_output,
                          bool dynamic )
@@ -72,12 +107,7 @@ public:
         pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
       }
 
-      // currently not dynamic learning rate
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
-          nn->modifyParam(
-            (unsigned int)i, j, learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-        }*/
         nn->modifyParamWholeLayer( i, learning_rate * pd_loss_wrt_output );
       }
     } else {
@@ -88,15 +118,11 @@ public:
         pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
         current_loss += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
       }
-      // cout << endl << pd_loss_wrt_output << endl;
 
       // 4/3 learning rate
       float lr_4_3 = 4.0 / 3 * learning_rate;
       // modifying weights and biases
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
-          nn->modifyParam( (unsigned int)i, j, lr_4_3 * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-        }*/
         nn->modifyParamWholeLayer( i, lr_4_3 * pd_loss_wrt_output );
       }
       // compute loss
@@ -110,10 +136,6 @@ public:
       float lr_2_3 = 2.0 / 3 * learning_rate;
       // modifying weights and biases
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
-          nn->modifyParam(
-            (unsigned int)i, j, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-        }*/
         nn->modifyParamWholeLayer( i, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output );
       }
       // compute loss
@@ -125,32 +147,20 @@ public:
 
       float min_loss = min( min( current_loss, loss_4_3 ), loss_2_3 );
       if ( min_loss == current_loss ) {
-        // cout << "current loss: " << current_loss << "       4/3: " << loss_4_3 << " 2/3: " << loss_2_3 << endl;
         //  update learning rate
         learning_rate = lr_2_3;
         // update params
         for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
-            nn->modifyParam( (unsigned int)i, j, -lr_2_3 * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-          }*/
           nn->modifyParamWholeLayer( i, -lr_2_3 * pd_loss_wrt_output );
         }
       } else if ( min_loss == loss_4_3 ) {
-        // cout << "loss 4/3 " << loss_4_3 << "         current loss: " << current_loss << " 2/3: " << loss_2_3 <<
-        // endl;
         //  update learning rate
         learning_rate = lr_4_3;
         // update params
         for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
-            nn->modifyParam(
-              (unsigned int)i, j, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-          }*/
           nn->modifyParamWholeLayer( i, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output );
         }
       } else {
-        // cout << "loss 2/3 " << loss_2_3 << "          current loss: " << current_loss << " 4/3: " << loss_4_3 <<
-        // endl;
         //  no need
       }
     }
