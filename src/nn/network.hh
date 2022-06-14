@@ -41,24 +41,14 @@ public:
     return layer0.getNumParams();
   }
 
-  void modifyParam( const unsigned int layerNum, const T paramNum, T newVal )
+  void modifyParamWholeLayer( const unsigned int layerNum, T epsilon )
   {
     if ( layerNum > 0 ) {
-      next.modifyParam( layerNum - 1, paramNum, newVal );
+      next.modifyParamWholeLayer( layerNum - 1, epsilon );
       return;
     }
     assert( layerNum == 0 );
-    layer0.modifyParam( paramNum, newVal );
-  }
-
-  void modifyParamWholeLayer( const unsigned int layerNum, const vector<T>& params )
-  {
-    if ( layerNum > 0 ) {
-      next.modifyParam( layerNum - 1, params );
-      return;
-    }
-    assert( layerNum == 0 );
-    layer0.modifyParamWholeLayer( params );
+    layer0.modifyParamWholeLayer( epsilon );
   }
 
   T getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )
@@ -156,16 +146,10 @@ public:
     return layer0.getNumParams();
   }
 
-  void modifyParam( const unsigned int layerNum, const T paramNum, T newVal )
+  void modifyParamWholeLayer( const unsigned int layerNum, T epsilon )
   {
     assert( layerNum == 0 );
-    layer0.modifyParam( paramNum, newVal );
-  }
-
-  void modifyParamWholeLayer( const unsigned int layerNum, const vector<T>& params )
-  {
-    assert( layerNum == 0 );
-    layer0.modifyParamWholeLayer( params );
+    layer0.modifyParamWholeLayer( epsilon );
   }
 
   T getEvaluatedGradient( const unsigned int layerNum, const unsigned int paramNum )

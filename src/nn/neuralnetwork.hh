@@ -74,10 +74,11 @@ public:
 
       // currently not dynamic learning rate
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
+        /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
           nn->modifyParam(
             (unsigned int)i, j, learning_rate * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-        }
+        }*/
+        nn->modifyParamWholeLayer( i, learning_rate * pd_loss_wrt_output );
       }
     } else {
       // original
@@ -93,9 +94,10 @@ public:
       float lr_4_3 = 4.0 / 3 * learning_rate;
       // modifying weights and biases
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
+        /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
           nn->modifyParam( (unsigned int)i, j, lr_4_3 * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-        }
+        }*/
+        nn->modifyParamWholeLayer( i, lr_4_3 * pd_loss_wrt_output );
       }
       // compute loss
       nn->apply( input );
@@ -108,10 +110,11 @@ public:
       float lr_2_3 = 2.0 / 3 * learning_rate;
       // modifying weights and biases
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
+        /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
           nn->modifyParam(
             (unsigned int)i, j, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-        }
+        }*/
+        nn->modifyParamWholeLayer( i, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output );
       }
       // compute loss
       nn->apply( input );
@@ -127,9 +130,10 @@ public:
         learning_rate = lr_2_3;
         // update params
         for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
+          /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
             nn->modifyParam( (unsigned int)i, j, -lr_2_3 * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-          }
+          }*/
+          nn->modifyParamWholeLayer( i, -lr_2_3 * pd_loss_wrt_output );
         }
       } else if ( min_loss == loss_4_3 ) {
         // cout << "loss 4/3 " << loss_4_3 << "         current loss: " << current_loss << " 2/3: " << loss_2_3 <<
@@ -138,10 +142,11 @@ public:
         learning_rate = lr_4_3;
         // update params
         for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
+          /*for ( int j = 0; j < (int)nn->getNumParams( i ); j++ ) {
             nn->modifyParam(
               (unsigned int)i, j, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output * nn->getEvaluatedGradient( i, j ) );
-          }
+          }*/
+          nn->modifyParamWholeLayer( i, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output );
         }
       } else {
         // cout << "loss 2/3 " << loss_2_3 << "          current loss: " << current_loss << " 4/3: " << loss_4_3 <<

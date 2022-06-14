@@ -83,23 +83,10 @@ public:
   unsigned int getInputSize() const { return input_size; }
   unsigned int getOutputSize() const { return output_size; }
 
-  void modifyParam( const unsigned int paramNum, T newVal )
+  void modifyParamWholeLayer( T epsilon )
   {
-    // cout << paramNum << " " << newVal << endl;
-    const unsigned int i = paramNum / output_size;
-    const unsigned int j = paramNum % output_size;
-    if ( i < input_size ) {
-      weights_( i, j ) -= newVal;
-    } else {
-      biases_( 0, j ) -= newVal;
-    }
-  }
-
-  void modifyParamWholeLayer( const vector<T>& params )
-  {
-    for ( int paramNum = 0; paramNum < params.size(); paramNum++ ) {
-      modifyParam( (unsigned int)paramNum, params[paramNum] );
-    }
+    weights_ -= grad_weights_ * epsilon;
+    biases_ -= grad_biases_ * epsilon;
   }
 
   T getEvaluatedGradient( const unsigned int paramNum )
