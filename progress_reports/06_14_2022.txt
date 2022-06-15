@@ -1,0 +1,26 @@
+Current Progress:
+In nnfun/src/nn, there are three files: layer.hh, network.hh, neuralnetwork.hh.l
+layer.hh has the class Layer which is the atom element of the neural network.
+network.hh has the recursive class Network which builds a recursive neural network.
+neuralnetwork.hh contains the class NeuralNetwork, which is directly the neural 
+network. It supports the back propagation function.
+More details can be found in class descriptions and function descriptions in those
+three files.
+
+Speed:
+Layer Config                                                       |   Time per Iteration (ns)
+    1 -> 4096 -> 1                                                 |        12602
+    1 -> 2048 -> 2048 -> 1                                         |       7405118
+    1 -> 1024 -> 1024 -> 1024 -> 1024 -> 1                         |       5193872
+    1 -> 256 -> 256 -> 256 -> 256 -> 256 -> 256 -> 256 -> 256 -> 1 |        311033
+
+Known Bugs:
+1. When there are a lot of layers, even with dynamic learning rate, sometimes 
+   the values still become nan.
+2. When trying to predict 1/x using nn 1->30->2560->10->1 in domain [50,70], all
+   loss become the same. It might be because of the lack of precision.
+
+Maybe Can Improve:
+1. Currently NeuralNetwork needs to input output_size twice. Maybe there is a 
+   way to only input once.
+2. It would be convenient to input vector to the class templates.
