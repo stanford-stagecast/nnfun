@@ -24,3 +24,18 @@ Maybe Can Improve:
 1. Currently NeuralNetwork needs to input output_size twice. Maybe there is a 
    way to only input once.
 2. It would be convenient to input vector to the class templates.
+
+Potential Next Steps:
+- Currently it seems that using a fully connected neural network with layers 
+  1->30->2560->10->1 can accurately predict 1/x for int x in range [1,20] if 
+  training on random floats in range [1,20], with around 10,000 iterations.
+- Currently it seems that using a fully conencted neural network with layers
+  1->30->2560->10->1 can predict 1/x for int x in range [1,100] if training on 
+  random floats in range [1,100], with around 100,000,000 iterations.
+- Maybe trying to predict random floats in range [1,200] could be the next step.
+  It might be helpful to analyze how many nodes in each layer could do the work.
+- Then maybe try to predict tempo with random initialization, no offsets, no 
+  noise, for random tempo in range [1,160].
+- Then maybe try to predict tempo with noise.
+- Then maybe try to predict tempo with some non-zero offsets.
+- If time still allows, try to add some quarter notes.
