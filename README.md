@@ -27,3 +27,18 @@
    make check # should pass the 3 tests
    ```
 
+## Testing continuous midi prediction
+
+1. ssh [your-name]@snr-piano.stanford.edu
+
+2. Clone this repo and run 
+
+   git checkout any_16_input_nn
+
+to get to the correct branch.
+
+3. Build/make as shown in step 3 above.
+
+4. In the /build directory, run ./src/frontend/predict_tempo_midi_continuous /dev/midi2
+
+5. Press the piano keys to receive a live prediction of the tempo from your last 16 note inputs.
