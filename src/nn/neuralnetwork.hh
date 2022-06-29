@@ -50,7 +50,7 @@ public:
 
   unsigned int get_output_size() { return output_size; }
 
-  unsigned int get_current_learning_rate() { return learning_rate; }
+  float get_current_learning_rate() { return learning_rate; }
 
   const Matrix<T, batch_size, output_size>& get_output() { return nn->output(); }
 
