@@ -59,11 +59,15 @@ public:
    * Description: This function initializes an object of Network class based on
    *              user inputs. Then it randomly assigns values to all parameters
    *              in the neural network.
+   * Parameters:
+   *			1. eta is the user-initialized learning rate, default 
+   *			   to be 0.001
    */
-  void initialize()
+  void initialize( float eta = 0.001 )
   {
     nn = new Network<T, batch_size, input_size, rest...>();
     nn->initializeWeightsRandomly();
+    learning_rate = eta;
   }
 
   /*

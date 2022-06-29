@@ -16,6 +16,8 @@ Available functions:
 
 2) initialize():
    Initialize the neural network. Default is random initialization.
+   The user may input learnign rate (eta) and may choose not to. Default learning
+   rate is 0.001.
 
 3) 4 getters:
    - get_num_of_layers
