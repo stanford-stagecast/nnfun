@@ -35,7 +35,7 @@ void program_body()
 {
   auto nn = make_unique<
     NeuralNetwork<float, num_layers, batch_size, input_size, output_size, layer_size, layer_size, layer_size, output_size>>();
-  nn->initialize(0.000001);
+  nn->initialize(0.0000001);
 
   Matrix<float, batch_size, input_size> input;
   Matrix<float, batch_size, output_size> ground_truth_output;
@@ -43,7 +43,7 @@ void program_body()
   /* training */
   float offset = 0;
   int init_iterations = 500000;
-  int second_iterations = 100000;
+  int second_iterations = 2500000;
   for ( int i = 0; i < (init_iterations + second_iterations); i++ ) {
     /* train on 30-60 range after 500000 iterations */
     float tempo;
@@ -63,14 +63,16 @@ void program_body()
   }
   /* testing */
   float tot_diff = 0;
-  for (  int tempo = 30; tempo < 241; tempo++ ) {
+  float t_high = 240;
+  float t_low = 30;
+  for (  int tempo = 30; tempo < t_high + 1; tempo++ ) {
     input = gen_time( tempo, offset, true);
     nn->apply(input);
     float difference = abs(tempo - nn->get_output()(0,0));
     cout << tempo << " -> " << nn->get_output()( 0, 0 ) << " difference: " << difference << endl;
     tot_diff += difference;
   }
-  cout << "Average Difference: " << tot_diff / 210 << endl;
+  cout << "Average Difference: " << tot_diff / (t_high - t_low) << endl;
 }
 
 int main( int argc, char*[] )
