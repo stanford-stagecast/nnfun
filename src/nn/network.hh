@@ -75,6 +75,13 @@ public:
     next.print( layerNum + 1 );
   }
 
+  void printWeights ( const unsigned int layerNum = 0 ) const
+  {
+    layer0.printWeights (layerNum );
+    next.printWeights( layerNum + 1 );
+  }
+  
+
   /* getter of number of layers */
   unsigned int getNumLayers() const { return next.getNumLayers() + 1; }
   /* getter of number of parameters in a specific layer */
@@ -205,6 +212,8 @@ public:
   void apply( const Matrix<T, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
 
   void print( const unsigned int layerNum = 0 ) const { layer0.print( layerNum ); }
+  
+  void printWeights( const unsigned int layerNum = 0) const { layer0.printWeights( layerNum);}
 
   unsigned int getNumLayers() const { return 1; }
 

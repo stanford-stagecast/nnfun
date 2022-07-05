@@ -116,6 +116,14 @@ public:
     cout << "grad_biases:" << endl << grad_biases_.format( CleanFmt ) << endl << endl << endl;
   }
 
+  void printWeights( const unsigned int layer_num ) const
+  {
+    cout << layer_num << endl;
+    const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
+    cout << "weights:" << endl << weights_.format( CleanFmt ) << endl << endl;
+
+  }
+
   /*
    * Function Name: perturbWeight
    * Description: This function increments the parameter (either weight in Matrix

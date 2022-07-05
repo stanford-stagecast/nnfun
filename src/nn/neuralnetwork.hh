@@ -75,6 +75,8 @@ public:
    * Description: This function prints the basic info of the whole neural network.
    */
   void print() { nn->print(); }
+  
+  void printWeights() { nn->printWeights();}
 
   /*
    * Function Name: apply
