@@ -122,6 +122,8 @@ public:
     const IOFormat CleanFmt( 4, 0, ", ", "\n", "[", "]" );
     cout << "weights:" << endl << weights_.format( CleanFmt ) << endl << endl;
 
+    cout << "biases:" << endl << biases_.format( CleanFmt ) << endl << endl;
+
   }
 
   /*
