@@ -23,7 +23,7 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool n
   Matrix<float, batch_size, input_size> ret_mat; //empty matrix [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   float amt_offset = 0;
   if (offset) {
-    float sbb        = (60.0 / tempo);   // seconds between beats
+    float sbb  = (60.0 / tempo);   // seconds between beats
     amt_offset = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX )) * sbb;
   }
   for ( auto i = 0; i < 16; i++ ) {
@@ -94,7 +94,8 @@ void program_body()
   cout << endl;
   cout << "Number of layers: " << num_layers << endl;
   cout << "Size of layer 1: " << layer_size1 << endl;
-
+  cout << "With noise? " << noise << endl;
+  cout << "With offset? " << offset << endl;
   cout << "Number of Iterations: " << iterations << endl;
   cout << "Learning Rate: " << nn->get_current_learning_rate() << endl;
 
