@@ -49,6 +49,26 @@ public:
     next.initializeWeightsRandomly();
   }
 
+  void initializeWeights( const unsigned int layerNum, const Matrix<T, Dynamic, Dynamic>& weights )
+  {
+    if ( layerNum > 0 ) {
+      next.initializeWeights( layerNum - 1, weights );
+      return;
+    }
+    assert( layerNum == 0 );
+    layer0.initializeWeights( weights );
+  }
+
+  void initializeBiases( const unsigned int layerNum, const Matrix<T, Dynamic, Dynamic>& biases )
+  {
+    if ( layerNum > 0 ) {
+      next.initializeBiases( layerNum - 1, biases );
+      return;
+    }
+    assert( layerNum == 0 );
+    layer0.initializeBiases( biases );
+  }
+
   /*
    * Function Name: aply
    * Description: This function recursively applys the input to the neuralnetwork.
@@ -80,7 +100,7 @@ public:
     layer0.printWeights (layerNum );
     next.printWeights( layerNum + 1 );
   }
-  
+
 
   /* getter of number of layers */
   unsigned int getNumLayers() const { return next.getNumLayers() + 1; }
@@ -209,10 +229,22 @@ public:
 
   void initializeWeightsRandomly() { layer0.initializeWeightsRandomly(); }
 
+  void initializeWeights( const unsigned int layerNum, const Matrix<T, i0, o0>& weights )
+  {
+    assert( layerNum == 0 );
+    layer0.initializeWeights( weights );
+  }
+
+  void initializeBiases( const unsigned int layerNum, const Matrix<T, 1, o0>& biases )
+  {
+    assert( layerNum == 0 );
+    layer0.initializeBiases( biases );
+  }
+
   void apply( const Matrix<T, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
 
   void print( const unsigned int layerNum = 0 ) const { layer0.print( layerNum ); }
-  
+
   void printWeights( const unsigned int layerNum = 0) const { layer0.printWeights( layerNum);}
 
   unsigned int getNumLayers() const { return 1; }

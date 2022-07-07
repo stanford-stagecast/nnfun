@@ -71,6 +71,13 @@ public:
     biases_ = Matrix<T, 1, output_size>::Random();
   }
 
+  void initializeWeights( const Matrix<T, input_size, output_size>& weights )
+  {
+    weights_( 0, 0 ) = weights( 0, 0 );
+  }
+
+  void initializeBiases( const Matrix<T, 1, output_size>& biases ) { biases_( 0, 0 ) = biases( 0, 0 ); }
+
   /*
    * Function Name: apply
    * Description: This function applys the input to the neuralnetwork.

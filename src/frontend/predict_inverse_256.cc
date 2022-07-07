@@ -20,6 +20,9 @@ void program_body()
   auto nn = make_unique<
     NeuralNetwork<float, num_layers, batch_size, input_size, output_size, 30, 2560, 10, output_size>>();
   nn->initialize();
+  string filename = "../src/frontend/output_weights.txt";
+  nn->init_params( filename );
+  nn->print();
 
   Matrix<float, batch_size, input_size> input;
   Matrix<float, batch_size, output_size> ground_truth_output;
@@ -30,7 +33,7 @@ void program_body()
   // cout << nn->get_output()( 0, 0 ) << endl;
   //const uint64_t b_start = Timer::timestamp_ns();
 
-  for ( int i = 0; i < 100000000; i++ ) {
+  /*for ( int i = 0; i < 100000000; i++ ) {
     input( 0, 0 ) = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 100 + 1;
     ground_truth_output( 0, 0 ) = 1.0 / input( 0, 0 );
     nn->apply(input);
@@ -47,7 +50,7 @@ void program_body()
     input( 0, 0 ) = (float)i;
     nn->apply( input );
     cout << i << " " << (1.0/input(0,0)) << " -> " << nn->get_output()( 0, 0 ) << endl;
-  }
+}*/
 }
 
 int main( int argc, char*[] )
