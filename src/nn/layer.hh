@@ -73,10 +73,10 @@ public:
 
   void initializeWeights( const Matrix<T, input_size, output_size>& weights )
   {
-    weights_( 0, 0 ) = weights( 0, 0 );
+    weights_ = weights.replicate(1,1);
   }
 
-  void initializeBiases( const Matrix<T, 1, output_size>& biases ) { biases_( 0, 0 ) = biases( 0, 0 ); }
+  void initializeBiases( const Matrix<T, 1, output_size>& biases ) { biases_= biases.replicate(1,1); }
 
   /*
    * Function Name: apply
