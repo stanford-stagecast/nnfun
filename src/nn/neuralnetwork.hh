@@ -153,7 +153,13 @@ public:
    */
   void print() { nn->print(); }
 
-  void printWeights() { nn->printWeights();}
+  void printWeights() { 
+    ofstream ofs{"../src/frontend/output_weights.txt"};
+    auto cout_buff = cout.rdbuf();
+    cout.rdbuf(ofs.rdbuf());
+    nn->printWeights();
+    cout.rdbuf(cout_buff);
+    }
 
   /*
    * Function Name: apply
