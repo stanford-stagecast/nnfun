@@ -1,12 +1,16 @@
 /**
- * Fila name: neuralnetwork.hh
- * Last Update: June 2022
+ * File name: neuralnetwork.hh
+ * Last Update: July 8 2022 (gbishko)
  */
 #pragma once
 
 #include "network.hh"
 
 #include <Eigen/Dense>
+#include <regex>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 using namespace std;
 using namespace Eigen;
@@ -40,6 +44,15 @@ private:
     return ( target - actual ) * ( target - actual );
   }
 
+  bool isNumber( const string& str )
+  {
+    for ( char c : str ) {
+      if ( isdigit( c ) == 0 )
+        return false;
+    }
+    return true;
+  }
+
 public:
   Network<T, batch_size, input_size, rest...>* nn {};
 
@@ -60,7 +73,7 @@ public:
    *              user inputs. Then it randomly assigns values to all parameters
    *              in the neural network.
    * Parameters:
-   *			1. eta is the user-initialized learning rate, default 
+   *			1. eta is the user-initialized learning rate, default
    *			   to be 0.001
    */
   void initialize( float eta = 0.001 )
@@ -70,13 +83,98 @@ public:
     learning_rate = eta;
   }
 
+  int init_params( string& filename )
+  {
+    cout << "INITIALIZING NETWORK" << endl;
+    
+    ifstream file( filename );
+
+    if (!file.is_open()) { cout << "ERROR" << endl;}
+
+    string line;
+    int curr_layer = -1;
+    bool is_weight = true;
+    int cnt = 0;
+    unsigned int curr_input_size = 0;
+    unsigned int curr_output_size = 0;
+    Matrix<T, Dynamic, Dynamic> weights_;
+    Matrix<T, Dynamic, Dynamic> biases_;
+    regex regex( ", " );
+    while ( getline( file, line ) ) {
+      //cout << "processing line: " << line << endl;
+      // empty line -> update params
+      if ( line.empty() )
+        continue;
+      // layer num -> get input size and output size
+      else if ( isNumber( line ) || strstr( line.c_str(), "end of file" )) {
+        if ( curr_layer != -1 ) {
+          cout << "SETTING LAYER " << curr_layer << endl;
+          nn->initializeWeights( curr_layer, weights_ );
+          nn->initializeBiases( curr_layer, biases_ );
+        }
+        if (strstr( line.c_str(), "end of file" )) break;
+        curr_layer = stoi( line );        
+        curr_input_size = nn->getLayerInputSize( curr_layer );
+        curr_output_size = nn->getLayerOutputSize( curr_layer );
+      }
+      // contains "weights" -> next line(s) will be param for weight
+      else if ( strstr( line.c_str(), "weights" ) ) {
+        is_weight = true;
+        //cout << "here " << curr_input_size << " " << curr_output_size << endl;
+        weights_.resize( (int)curr_input_size, (int)curr_output_size );
+        cnt = 0;
+      }
+      // contains "biases" -> next line will be param for biase
+      else if ( strstr( line.c_str(), "biases" ) ) {
+        is_weight = false;
+        //cout << "this " << curr_output_size << endl;
+        //cout << biases_.rows() << " " << biases_.cols() << endl;
+        biases_.resize( 1, (int)curr_output_size );
+    } else {
+      vector<string> params( sregex_token_iterator( line.begin(), line.end(), regex, -1 ),
+                             sregex_token_iterator() );
+      // get rid of square brackets
+      auto s = &( params[0] );
+      ( *s ).erase( remove( ( *s ).begin(), ( *s ).end(), '[' ), ( *s ).end() );
+      s = &( params[params.size() - 1] );
+      s->erase( remove( s->begin(), s->end(), ']' ), s->end() );
+
+      for ( int i = 0; i < (int)params.size(); i++ ) {
+        float p = stof( params[i] );
+        //cout << "THIS IS P: " << p << endl;
+        if ( is_weight ) {
+          weights_( cnt, i ) = p;
+          cout << "Setting weight " << p << " to layer " << curr_layer << endl;
+        } else {
+          biases_( 0, i ) = p;
+          cout << "Setting bias " << p << " to layer " << curr_layer << endl;
+        }
+      }
+      cnt++;
+    }
+  }
+  
+  file.close();
+  return 0;
+}
+
   /*
    * Function Name: print
    * Description: This function prints the basic info of the whole neural network.
    */
   void print() { nn->print(); }
-  
-  void printWeights() { nn->printWeights();}
+
+  void printWeights(string filename = "output.txt") {
+    string directory = "../src/frontend/";
+    directory += filename;
+    ofstream ofs{directory};
+    auto cout_buff = cout.rdbuf();
+    cout.rdbuf(ofs.rdbuf());
+    nn->printWeights();
+    cout << endl << "end of file" << endl;
+    cout.rdbuf(cout_buff);
+  }
+    
 
   /*
    * Function Name: apply
