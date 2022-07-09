@@ -14,26 +14,37 @@ Available functions:
    output_size = 1;
    `rest` is inputed as 16, 1.
 
-2) initialize():
+2) initialize(eta):
    Initialize the neural network. Default is random initialization.
-   The user may input learnign rate (eta) and may choose not to. Default learning
+   The user may input learning rate (`eta`) and may choose not to. Default learning
    rate is 0.001.
 
-3) 4 getters:
+3) init_params(filename):
+   Read the file with name `filename` (need to include directory), update the nn as
+   indicated in the input file.
+   - The input file needs to have the same format as the output of function 
+     printWeights(), or it will behave unexpectedly.
+   - The input file needs to have the nn with exactly the same configuration (number
+     of layers and number of nodes in each corresponding layer) , or segfault might
+     occur.
+
+4) 4 getters:
    - get_num_of_layers
    - get-input_size
    - get_output_size
    - get_output  This getter returns the Matrix containing the output of the nn.
                  Note that need to apply(input) first.
 
-4) print():
-   Same as Network::print().
+5) print() and printWeights(filename):
+   print() is the same as Network::print().
+   printWeights(filename) only prints the parameters to the input `filename` in 
+   directory "../src/fronted/", default filename is "output.txt".
 
-5) apply(input):
-   Apply the input to the nn with the current weights and biases.
+6) apply(input):
+   Apply the `input` to the nn with the current weights and biases.
    Same as Network::apply().
 
-6) gradient_descent(input, ground_truth_output, dynamic):
+7) gradient_descent(input, ground_truth_output, dynamic):
    Conducting the gradient descent process to the nn.
    If `dynamic` is set to true, then the neuralnetwork will use dynamic eta;
    otherwise eta is default to 0.001.
