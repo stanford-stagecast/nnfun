@@ -167,6 +167,8 @@ public:
     cout.rdbuf(cout_buff);
   }
 
+  void printLayerOutput(const unsigned int layerNumber) {cout << layerNumber << endl; nn->printLayerOutput(layerNumber);  }
+
   /*
    * Function Name: apply
    * Description: This function applys the user input to the neural network.

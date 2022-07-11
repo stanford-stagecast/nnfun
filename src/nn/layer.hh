@@ -132,7 +132,11 @@ public:
     cout << "biases:" << endl << biases_.format( CleanFmt ) << endl << endl;
 
   }
-
+  
+  void printLayerOutput() const
+  {
+    cout << this->output() << endl;
+  }
   /*
    * Function Name: perturbWeight
    * Description: This function increments the parameter (either weight in Matrix

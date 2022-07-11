@@ -101,6 +101,17 @@ public:
     next.printWeights( layerNum + 1 );
   }
 
+  void printLayerOutput(const unsigned int layerNumber) const
+  {
+    if(layerNumber > 0)
+    {
+      next.printLayerOutput(layerNumber - 1);
+    }
+    else
+    {
+      layer0.printLayerOutput();
+    }
+  }
 
   /* getter of number of layers */
   unsigned int getNumLayers() const { return next.getNumLayers() + 1; }
@@ -246,6 +257,8 @@ public:
   void print( const unsigned int layerNum = 0 ) const { layer0.print( layerNum ); }
 
   void printWeights( const unsigned int layerNum = 0) const { layer0.printWeights( layerNum);}
+
+  void printLayerOutput( const unsigned int layerNumber) const {int jonathan = layerNumber; jonathan++; layer0.printLayerOutput();}
 
   unsigned int getNumLayers() const { return 1; }
 
