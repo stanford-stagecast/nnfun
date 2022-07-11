@@ -1,6 +1,6 @@
 /**
  * Fila name: neuralnetwork.hh
- * Last Update: June 2022
+ * Last Update: July 11 2022
  */
 #pragma once
 
@@ -143,6 +143,10 @@ public:
       cnt++;
     }
   }
+  // Last layer bug fix below:
+  nn->initializeWeights( curr_layer, weights_ );
+  nn->initializeBiases( curr_layer, biases_ );
+
   file.close();
   return 0;
 }
