@@ -83,6 +83,39 @@ public:
     learning_rate = eta;
   }
 
+  /*
+   * Function Name: init_params
+   * Description: This function assigns the parameters including weights and
+   *              biases of the neural network according to the user inputs.
+   * Parameters:
+   *			1. filename is the name of the file storing the info of the
+   *               parameters
+   * Example File Content (1->2->2->1):
+   * 0
+   * weights:
+   * [ 0.6418, -0.2696]
+
+   * biases:
+   * [0.6463, 0.5575]
+
+   * 1
+   * weights:
+   * [ 0.7525, -0.3296]
+   * [-0.5903,  0.5365]
+
+   * biases:
+   * [-0.314, 0.1079]
+
+   * 2
+   * weights:
+   * [  6.21]
+   * [0.2577]
+``
+   * biases:
+   * [-0.03504]
+   *
+   * Note: Currently assumes the file exist and has the above structure.
+   */
   int init_params( string& filename )
   {
     ifstream file( filename );
@@ -157,7 +190,7 @@ public:
    */
   void print() { nn->print(); }
 
-  void printWeights(string filename = "output.txt") { 
+  void printWeights(string filename = "output.txt") {
     string directory = "../src/frontend/";
     directory += filename;
     ofstream ofs{directory};
