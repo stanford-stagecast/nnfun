@@ -15,8 +15,8 @@ constexpr size_t input_size = 16;
 constexpr size_t output_size = 1;
 constexpr size_t num_layers = 2;
 constexpr size_t layer_size1 = 16;
-constexpr size_t layer_size2 = 480;
-constexpr size_t layer_size3 = 480;
+// constexpr size_t layer_size2 = 480;
+// constexpr size_t layer_size3 = 480;
 
 Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool noise )
 {
@@ -57,15 +57,15 @@ void program_body()
  /******************** TRAINING ********************/
   bool offset = true;
   bool noise = true;
-  int iterations = 20000000;
+  int iterations = 40000000;
   for ( int i = 0; i < iterations; i++ ) {
       float tempo = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 210 + 30;
       input = gen_time( tempo, offset, noise );
 
       // Print Progress
-      /*if(i % 1000 == 0) {
+      if(i % 1000 == 0) {
       cout << "training " << tempo << " bpm... (" << (float(i)/iterations)*100 << " percent done)" << endl;
-      }*/
+      }
 
       // Train the neural network
       ground_truth_output(0,0) = 60.0/tempo;
