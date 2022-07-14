@@ -123,9 +123,9 @@ public:
     cout << "grad_biases:" << endl << grad_biases_.format( CleanFmt ) << endl << endl << endl;
   }
 
-  void printWeights( const unsigned int layer_num ) const
+  void printWeights( int layer_offset, const unsigned int layer_num) const
   {
-    cout << layer_num << endl;
+    cout << layer_num + layer_offset << endl;
     const IOFormat CleanFmt( 10, 0, ", ", "\n", "[", "]" );
     cout << "weights:" << endl << weights_.format( CleanFmt ) << endl << endl;
 

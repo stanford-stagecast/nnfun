@@ -83,39 +83,6 @@ public:
     learning_rate = eta;
   }
 
-  /*
-   * Function Name: init_params
-   * Description: This function assigns the parameters including weights and
-   *              biases of the neural network according to the user inputs.
-   * Parameters:
-   *			1. filename is the name of the file storing the info of the
-   *               parameters
-   * Example File Content (1->2->2->1):
-   * 0
-   * weights:
-   * [ 0.6418, -0.2696]
-
-   * biases:
-   * [0.6463, 0.5575]
-
-   * 1
-   * weights:
-   * [ 0.7525, -0.3296]
-   * [-0.5903,  0.5365]
-
-   * biases:
-   * [-0.314, 0.1079]
-
-   * 2
-   * weights:
-   * [  6.21]
-   * [0.2577]
-``
-   * biases:
-   * [-0.03504]
-   *
-   * Note: Currently assumes the file exist and has the above structure.
-   */
   int init_params( string& filename )
   {
     ifstream file( filename );
@@ -190,17 +157,42 @@ public:
    */
   void print() { nn->print(); }
 
-  void printWeights(string filename = "output.txt") {
-    string directory = "../src/frontend/";
-    directory += filename;
-    ofstream ofs{directory};
-    auto cout_buff = cout.rdbuf();
-    cout.rdbuf(ofs.rdbuf());
-    nn->printWeights();
-    cout.rdbuf(cout_buff);
+
+  /* 
+   * Function Name: printWeights
+   * Description: This function prints out the weights of the neural network
+   *               it is called on. It can be used to print to a file or to
+   *               std::out and can also add an offset to the printing of the
+   *               weights of an nn in cases where it is called more than once
+   *               to print several neural networks as one.
+   * Parameters: 
+   *     1. filename is the name of the file that the function will print to.
+   *     2. mode specifies whether the function will print to a file or stdout.
+   *           mode can be 1 (print to a file) or 0 (print to stdout) and is 
+   *           1 by default.
+   *     3. offset is the number of layers the layernumber printed will be offset by.
+   *           offset is 0 by default but should be nonzero when printing multiple
+   *           neural nets as one.
+   */  
+
+  void printWeights(string filename = "output.txt", int mode = 1, int layer_offset = 0) { 
+    if (mode == 1) {
+      string directory = "../src/frontend/";
+      directory += filename;
+      ofstream ofs{directory};
+      auto cout_buff = cout.rdbuf();
+      cout.rdbuf(ofs.rdbuf());
+      nn->printWeights(layer_offset);
+      cout.rdbuf(cout_buff);
+    } else if (mode == 0) {
+      nn->printWeights(layer_offset);
+    } else {
+      cout << "Invalid mode selected. Options are 1 (print to file) or 0 (print to stdout)" << endl;
+      exit(EXIT_FAILURE);
+    }
   }
 
-  void printLayerOutput(const unsigned int layerNumber) {cout << layerNumber << endl; nn->printLayerOutput(layerNumber);  }
+  void printLayerOutput(const unsigned int layerNumber) {cout << "Output for Layer: " << layerNumber << endl; nn->printLayerOutput(layerNumber);  }
 
   /*
    * Function Name: apply

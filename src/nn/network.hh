@@ -95,10 +95,10 @@ public:
     next.print( layerNum + 1 );
   }
 
-  void printWeights ( const unsigned int layerNum = 0 ) const
+  void printWeights ( int layer_offset, const unsigned int layerNum = 0 ) const
   {
-    layer0.printWeights (layerNum );
-    next.printWeights( layerNum + 1 );
+    layer0.printWeights (layer_offset, layerNum);
+    next.printWeights( layer_offset, layerNum + 1);
   }
 
   void printLayerOutput(const unsigned int layerNumber) const
@@ -256,7 +256,7 @@ public:
 
   void print( const unsigned int layerNum = 0 ) const { layer0.print( layerNum ); }
 
-  void printWeights( const unsigned int layerNum = 0) const { layer0.printWeights( layerNum);}
+  void printWeights( int layer_offset, const unsigned int layerNum = 0) const { layer0.printWeights( layer_offset, layerNum);}
 
   void printLayerOutput( const unsigned int layerNumber) const {int jonathan = layerNumber; jonathan++; layer0.printLayerOutput();}
 
