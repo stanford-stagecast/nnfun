@@ -88,7 +88,13 @@ public:
   void apply( const Matrix<T, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_ ).rowwise() + biases_;
-    output_ = unactivated_output_.cwiseMax( 0 );
+    output_ = unactivated_output_.cwiseMax( 0 );  
+  }
+
+  void apply_leaky( const Matrix<T, batch_size, input_size>& input )
+  {
+    unactivated_output_ = ( input * weights_ ).rowwise() + biases_;
+    output_ = unactivated_output_.cwiseMax( 0.1 * unactivated_output_ );  
   }
 
   void apply_without_activation( const Matrix<T, batch_size, input_size>& input )

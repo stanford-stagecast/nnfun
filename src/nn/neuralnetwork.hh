@@ -235,6 +235,8 @@ public:
    *			1. input is the input to the neural network
    */
   void apply( const Matrix<T, batch_size, input_size>& input ) { nn->apply( input ); }
+  
+  void apply_leaky( const Matrix<T, batch_size, input_size>& input ) { nn->apply_leaky( input ); }
 
   /*
    * Function Name: gradient_descent
@@ -296,6 +298,80 @@ public:
       }
       // compute loss
       nn->apply( input );
+      float loss_2_3 = 0;
+      for ( int i = 0; i < (int)output_size; i++ ) {
+        loss_2_3 += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+      }
+
+      float min_loss = min( min( current_loss, loss_4_3 ), loss_2_3 );
+      if ( min_loss == current_loss ) {
+        //  update learning rate
+        learning_rate = lr_2_3;
+        // update params
+        for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
+          nn->modifyParamWholeLayer( i, -lr_2_3 * pd_loss_wrt_output );
+        }
+      } else if ( min_loss == loss_4_3 ) {
+        //  update learning rate
+        learning_rate = lr_4_3;
+        // update params
+        for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
+          nn->modifyParamWholeLayer( i, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output );
+        }
+      } else {
+        //  no need
+      }
+    }
+  }
+
+  void leaky_gradient_descent( Matrix<T, batch_size, input_size>& input,
+                         Matrix<T, batch_size, output_size>& ground_truth_output,
+                         bool dynamic )
+  {
+    nn->apply_leaky( input );
+    nn->computeDeltas();
+    nn->evaluateGradients( input );
+
+    if ( !dynamic ) {
+      float pd_loss_wrt_output = 0;
+      // assuming batch_size = 1
+      for ( int i = 0; i < (int)output_size; i++ ) {
+        pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+      }
+
+      for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
+        nn->modifyParamWholeLayer( i, learning_rate * pd_loss_wrt_output );
+      }
+    } else {
+      // original
+      float current_loss = 0;
+      float pd_loss_wrt_output = 0;
+      for ( int i = 0; i < (int)output_size; i++ ) {
+        pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+        current_loss += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+      }
+
+      // 4/3 learning rate
+      float lr_4_3 = 4.0 / 3 * learning_rate;
+      // modifying weights and biases
+      for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
+        nn->modifyParamWholeLayer( i, lr_4_3 * pd_loss_wrt_output );
+      }
+      // compute loss
+      nn->apply_leaky( input );
+      float loss_4_3 = 0;
+      for ( int i = 0; i < (int)output_size; i++ ) {
+        loss_4_3 += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+      }
+
+      // 2/3 learning rate
+      float lr_2_3 = 2.0 / 3 * learning_rate;
+      // modifying weights and biases
+      for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
+        nn->modifyParamWholeLayer( i, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output );
+      }
+      // compute loss
+      nn->apply_leaky( input );
       float loss_2_3 = 0;
       for ( int i = 0; i < (int)output_size; i++ ) {
         loss_2_3 += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
