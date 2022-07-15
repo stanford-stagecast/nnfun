@@ -13,11 +13,11 @@ using namespace Eigen;
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 16;
 constexpr size_t output_size = 1;
-constexpr size_t num_layers = 2;
+constexpr size_t num_layers = 5;
 constexpr size_t layer_size1 = 16;
 constexpr size_t layer_size2 = 1;
-constexpr size_t layer_size3 = 480;
-constexpr size_t layer_size4 = 480;
+constexpr size_t layer_size3 = 30;
+constexpr size_t layer_size4 = 2560;
 
 Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool noise )
 {
@@ -58,7 +58,7 @@ void program_body()
  /******************** TRAINING ********************/
   bool offset = true;
   bool noise = true;
-  int iterations = 20000000;
+  int iterations = 2000000;
   for ( int i = 0; i < iterations; i++ ) {
       float tempo = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 210 + 30;
       input = gen_time( tempo, offset, noise );

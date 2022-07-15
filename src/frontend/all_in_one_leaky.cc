@@ -13,7 +13,7 @@ using namespace Eigen;
 constexpr size_t batch_size = 1;
 constexpr size_t input_size = 16;
 constexpr size_t output_size = 1;
-constexpr size_t num_layers = 2;
+constexpr size_t num_layers = 5;
 constexpr size_t layer_size1 = 16;
 constexpr size_t layer_size2 = 1;
 constexpr size_t layer_size3 = 30;
@@ -43,7 +43,7 @@ void program_body()
 {
   auto nn = make_unique<
     NeuralNetwork<float, num_layers, batch_size, input_size, output_size, layer_size1, layer_size2, layer_size3, layer_size4, output_size>>();
-  nn->initialize(0.0000001);
+  nn->initialize(0.000000001);
 
   Matrix<float, batch_size, input_size> input;
   Matrix<float, batch_size, output_size> ground_truth_output;
@@ -64,7 +64,7 @@ void program_body()
       input = gen_time( tempo, offset, noise );
 
       // Print Progress
-      if(i % 1000 == 0) {
+      if(i % 10000 == 0) {
       cout << "training " << tempo << " bpm... (" << (float(i)/iterations)*100 << " percent done)" << endl;
       }
 
@@ -77,6 +77,7 @@ void program_body()
   cout << endl;
   cout << "******* TRAINING COMPLETE :) *******" << endl;
   cout << endl;
+  nn->printWeights("leaky_weights.txt");
   cout << "Testing neural network now..." << endl;
   cout << endl;
 
