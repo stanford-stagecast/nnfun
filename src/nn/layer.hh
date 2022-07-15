@@ -102,7 +102,7 @@ public:
   void apply_gelu( const Matrix<T, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_).rowwise() + biases_;
-    output_(0,0) = unactivated_output_(0,0)*sigmoid((float)1.702*unactivated_output_(0,0));
+    output_ = unactivated_output_*sigmoid((float)1.702*unactivated_output_);
   }
 
   void apply_without_activation( const Matrix<T, batch_size, input_size>& input )

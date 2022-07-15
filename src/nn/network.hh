@@ -89,8 +89,8 @@ public:
 
   void apply_gelu( const Matrix<T, batch_size, i0>& input )
   {
-    layer0.apply_leaky( input );
-    next.apply_leaky( layer0.output() );
+    layer0.apply_gelu( input );
+    next.apply_gelu( layer0.output() );
   }
   /*
    * Function Name: print
