@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <Eigen/Dense>
 #include <iostream>
 
@@ -78,6 +79,7 @@ public:
 
   void initializeBiases( const Matrix<T, 1, output_size>& biases ) { biases_= biases.replicate(1,1); }
 
+  float sigmoid( int x ) { return 1/(1 + exp(-x)); }
   /*
    * Function Name: apply
    * Description: This function applys the input to the neuralnetwork.
@@ -97,11 +99,18 @@ public:
     output_ = unactivated_output_.cwiseMax( 0.1 * unactivated_output_ );  
   }
 
+  void apply_gelu( const Matrix<T, batch_size, input_size>& input )
+  {
+    unactivated_output_ = ( input * weights_).rowwise() + biases_;
+    output_(0,0) = unactivated_output_(0,0)*sigmoid((float)1.702*unactivated_output_(0,0));
+  }
+
   void apply_without_activation( const Matrix<T, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_ ).rowwise() + biases_;
     output_ = unactivated_output_;
   }
+
 
   /*
    * Function Name: print

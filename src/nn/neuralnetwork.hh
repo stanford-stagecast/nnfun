@@ -238,6 +238,8 @@ public:
   
   void apply_leaky( const Matrix<T, batch_size, input_size>& input ) { nn->apply_leaky( input ); }
 
+  void apply_gelu( const Matrix<T, batch_size, input_size>& input ) { nn->apply_gelu( input ); }
+
   /*
    * Function Name: gradient_descent
    * Description: This function performs gradient descent based on the input

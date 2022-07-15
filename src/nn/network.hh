@@ -86,6 +86,12 @@ public:
     layer0.apply_leaky( input );
     next.apply_leaky( layer0.output() );
   }
+
+  void apply_gelu( const Matrix<T, batch_size, i0>& input )
+  {
+    layer0.apply_leaky( input );
+    next.apply_leaky( layer0.output() );
+  }
   /*
    * Function Name: print
    * Description: This function prints the basic info of the neural network to
@@ -260,6 +266,8 @@ public:
   void apply( const Matrix<T, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
 
   void apply_leaky( const Matrix<T, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
+
+  void apply_gelu( const Matrix<T, batch_size, i0>& input ) { layer0.apply_gelu( input ); }
 
 
   void print( const unsigned int layerNum = 0 ) const { layer0.print( layerNum ); }
