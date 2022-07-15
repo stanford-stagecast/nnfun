@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <Eigen/Dense>
+#include <unsupported/Eigen/SpecialFunctions>
 #include <iostream>
 
 using namespace std;
@@ -102,7 +103,8 @@ public:
   void apply_gelu( const Matrix<T, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_).rowwise() + biases_;
-    output_ = unactivated_output_*sigmoid((float)1.702*unactivated_output_);
+    auto temp_output_ = unactivated_output_ / pow(2, 0.5);
+    output_ = unactivated_output_ * 0.5 * (1 + temp_output_.erf());
   }
 
   void apply_without_activation( const Matrix<T, batch_size, input_size>& input )
