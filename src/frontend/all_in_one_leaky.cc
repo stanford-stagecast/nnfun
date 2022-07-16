@@ -58,20 +58,29 @@ void program_body()
  /******************** TRAINING ********************/
   bool offset = true;
   bool noise = true;
-  int iterations = 20000000;
+  float tempo = 0;
+  int iterations = 2000000;
   for ( int i = 0; i < iterations; i++ ) {
-      float tempo = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 210 + 30;
-      input = gen_time( tempo, offset, noise );
+    float prob = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) );
+    if(prob < 0.4)
+    {
+        tempo = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 20 + 30;
 
-      // Print Progress
-      if(i % 10000 == 0) {
-      cout << "training " << tempo << " bpm... (" << (float(i)/iterations)*100 << " percent done)" << endl;
-      }
+    }
+    else{
+        tempo = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 210 + 30;
+    }
+    input = gen_time( tempo, offset, noise );
 
-      // Train the neural network
-      ground_truth_output(0,0) = tempo;
-      nn->apply_leaky(input);
-      nn->gradient_descent( input, ground_truth_output, true );
+    // Print Progress
+    if(i % 10000 == 0) {
+    cout << "training " << tempo << " bpm... (" << (float(i)/iterations)*100 << " percent done)" << endl;
+    }
+
+    // Train the neural network
+    ground_truth_output(0,0) = tempo;
+    nn->apply_leaky(input);
+    nn->leaky_gradient_descent( input, ground_truth_output, true );
   }
   
   cout << endl;
@@ -86,12 +95,12 @@ void program_body()
 
   // nn->print();
  /******************** TESTING ********************/
-  for (  int tempo = 30; tempo < 241; tempo++ ) {
-    input = gen_time( tempo, offset, noise );
+  for (  int tempo_test = 30; tempo_test < 241; tempo_test++ ) {
+    input = gen_time( tempo_test, offset, noise );
     // input( 0, 0 ) = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 1.75 + 0.25;
     // ground_truth_output( 0, 0 ) = 60.0 / input( 0, 0 );
     nn->apply_leaky(input);
-    cout << tempo << " -> " << nn->get_output()( 0, 0 ) << endl;
+    cout << tempo_test << " -> " << nn->get_output()( 0, 0 ) << endl;
   }
   cout << endl;
   cout << "Number of layers: " << num_layers << endl;
