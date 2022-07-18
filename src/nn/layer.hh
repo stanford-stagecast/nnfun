@@ -104,18 +104,21 @@ public:
   {
     unactivated_output_ = ( input * weights_).rowwise() + biases_;
     auto temp_output_ = unactivated_output_ / pow(2, 0.5);
-    for (unsigned int i = 0; i < unactivated_output_.size(); i++) {
-      output_(i) = unactivated_output_(i) * 0.5 * (1 + temp_output_(i));
+    for (unsigned int i = 0; i < unactivated_output_.rows(); i++) {
+      for (unsigned int j = 0; j < unactivated_output_.cols(); j++) {
+        output_(i, j) = unactivated_output_(i, j) * 0.5 * (1 + temp_output_(i, j));
+      }
     }
-    // for (unsigned int i = 0; i < batch_size; i++) {
-    //   for (unsigned int j = 0; j < input_size; j++) {
-    //     output_(i, j) = unactivated_output_(i, j) * 0.5 * (1 + erf(temp_output_(i, j)));
-    //     cout << "Row: " << i << " Column: " << j << endl;
-    //     cout << batch_size << " : " << input_size << endl;
-    //   }
-    // }
-    // output_ = unactivated_output_ * 0.5 * (1 + temp_output_.erf());
-    // cout << output_ << endl;
+  }
+
+  void apply_sigmoid( const Matrix<T, batch_size, input_size>& input )
+  {
+    unactivated_output_ = ( input * weights_).rowwise() + biases_;
+    for (unsigned int i = 0; i < unactivated_output_.rows(); i++) {
+      for (unsigned int j = 0; j < unactivated_output_.cols(); j++) {
+        output_(i, j) = sigmoid(unactivated_output_(i, j));
+      }
+    }
   }
 
   void apply_without_activation( const Matrix<T, batch_size, input_size>& input )

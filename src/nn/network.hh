@@ -92,6 +92,11 @@ public:
     layer0.apply_gelu( input );
     next.apply_gelu( layer0.output() );
   }
+
+  void apply_sigmoid( const Matrix<T, batch_size, i0>& input ) {
+    layer0.apply_sigmoid( input );
+    next.apply_sigmoid( layer0.output() );
+  }
   /*
    * Function Name: print
    * Description: This function prints the basic info of the neural network to
@@ -267,7 +272,9 @@ public:
 
   void apply_leaky( const Matrix<T, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
 
-  void apply_gelu( const Matrix<T, batch_size, i0>& input ) { layer0.apply_gelu( input ); }
+  void apply_gelu( const Matrix<T, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
+
+  void apply_sigmoid( const Matrix<T, batch_size, i0>& input ) { layer0.apply_without_activation( input ); }
 
 
   void print( const unsigned int layerNum = 0 ) const { layer0.print( layerNum ); }
