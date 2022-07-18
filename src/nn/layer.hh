@@ -97,7 +97,7 @@ public:
   void apply_leaky( const Matrix<T, batch_size, input_size>& input )
   {
     unactivated_output_ = ( input * weights_ ).rowwise() + biases_;
-    output_ = unactivated_output_.cwiseMax( 0.1 * unactivated_output_ );  
+    output_ = unactivated_output_.cwiseMax( 0.01 * unactivated_output_ );  
   }
 
   void apply_gelu( const Matrix<T, batch_size, input_size>& input )
@@ -107,16 +107,6 @@ public:
     for (unsigned int i = 0; i < unactivated_output_.rows(); i++) {
       for (unsigned int j = 0; j < unactivated_output_.cols(); j++) {
         output_(i, j) = unactivated_output_(i, j) * 0.5 * (1 + temp_output_(i, j));
-      }
-    }
-  }
-
-  void apply_sigmoid( const Matrix<T, batch_size, input_size>& input )
-  {
-    unactivated_output_ = ( input * weights_).rowwise() + biases_;
-    for (unsigned int i = 0; i < unactivated_output_.rows(); i++) {
-      for (unsigned int j = 0; j < unactivated_output_.cols(); j++) {
-        output_(i, j) = sigmoid(unactivated_output_(i, j));
       }
     }
   }
