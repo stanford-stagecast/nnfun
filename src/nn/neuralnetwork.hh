@@ -405,7 +405,7 @@ void gelu_gradient_descent( Matrix<T, batch_size, input_size>& input,
                          bool dynamic )
   {
     nn->apply_leaky( input );
-    nn->computeDeltas();
+    nn->computeLeakyDeltas();
     nn->evaluateGradients( input );
 
     if ( !dynamic ) {

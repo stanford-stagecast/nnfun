@@ -59,7 +59,7 @@ void program_body()
   bool offset = true;
   bool noise = true;
   float tempo = 0;
-  int iterations = 2000000;
+  int iterations = 4000000;
   for ( int i = 0; i < iterations; i++ ) {
     float prob = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) );
     if(prob < 0.4)

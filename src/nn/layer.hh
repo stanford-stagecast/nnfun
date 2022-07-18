@@ -227,6 +227,17 @@ public:
     return deltas_ * weights_.transpose();
   }
 
+    const Matrix<T, batch_size, input_size> computeLeakyDeltas( Matrix<T, batch_size, output_size> nextLayerDeltas )
+  {
+    // activated nodes is the matrix that stores 0/1 corresponding to whether the output node was activated
+    Matrix<T, batch_size, output_size> activated_nodes
+      = ( unactivated_output_.array() > 0 ).template cast<T>().matrix();
+    activated_nodes = 0.99 * activated_nodes;
+    activated_nodes.array() += 0.01;
+    deltas_ = nextLayerDeltas.cwiseProduct( activated_nodes );
+    return deltas_ * weights_.transpose();
+  }
+
   const Matrix<T, batch_size, input_size> computeDeltasLastLayer(
     Matrix<T, batch_size, output_size> nextLayerDeltas )
   {
