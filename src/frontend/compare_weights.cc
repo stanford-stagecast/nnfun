@@ -44,7 +44,7 @@ void program_body()
   auto nn = make_unique<
     NeuralNetwork<float, num_layers, batch_size, input_size, output_size, layer_size1, layer_size2, layer_size3, layer_size4, output_size>>();
   nn->initialize(0.0000001);
-  string printed_weights_file = "/home/mirandan/nnfun/src/frontend/holyweights.txt";
+  string printed_weights_file = "/home/mirandan/nnfun/src/frontend/leaky_weights.txt";
   nn->init_params(printed_weights_file);
   Matrix<float, batch_size, input_size> input;
   Matrix<float, batch_size, output_size> ground_truth_output;
@@ -93,7 +93,7 @@ void program_body()
     input = gen_time( tempo, offset, noise );
     // input( 0, 0 ) = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 1.75 + 0.25;
     // ground_truth_output( 0, 0 ) = 60.0 / input( 0, 0 );
-    nn->apply(input);
+    nn->apply_leaky(input);
     cout << tempo << " -> " << nn->get_output()( 0, 0 ) << endl;
   }
   cout << endl;
