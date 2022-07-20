@@ -19,18 +19,23 @@ constexpr size_t layer_size2 = 1;
 constexpr size_t layer_size3 = 30;
 constexpr size_t layer_size4 = 2560;
 
+float get_rand(float min, float max)
+{
+  return (rand()/(RAND_MAX + 1.0 ))*(max-min) + min;
+}
+
 Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool noise )
 {
   Matrix<float, batch_size, input_size> ret_mat; //empty matrix [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   float amt_offset = 0;
   if (offset) {
     float sbb  = (60.0 / tempo);   // seconds between beats
-    amt_offset = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX )) * sbb;
+    amt_offset = get_rand(0.0, sbb);
   }
   for ( auto i = 0; i < 16; i++ ) {
     ret_mat( i ) = (60.0/tempo) * i + offset; //[0, 0.25, 0.5, 0.75, 1, 1.25, ...] (backward in time)
     if (noise) {
-      float pct_noise = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX )) * 0.1 - 0.05;
+      float pct_noise = get_rand(-0.05, 0.05);
       float amt_noise = pct_noise * (60.0/tempo);
       ret_mat(i) += amt_noise;
     }
@@ -38,6 +43,8 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool n
   }
   return ret_mat;
 }
+
+
 
 void program_body()
 {
@@ -59,16 +66,16 @@ void program_body()
   bool offset = true;
   bool noise = true;
   float tempo = 0;
-  int iterations = 4000000;
+  int iterations = 1000000;
   for ( int i = 0; i < iterations; i++ ) {
-    float prob = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) );
+    float prob = get_rand(0, 1);
     if(prob < 0.4)
     {
-        tempo = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 20 + 30;
+        tempo = get_rand(30, 50);
 
     }
     else{
-        tempo = static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX ) ) * 210 + 30;
+        tempo = get_rand(30, 240);
     }
     input = gen_time( tempo, offset, noise );
 
@@ -86,7 +93,7 @@ void program_body()
   cout << endl;
   cout << "******* TRAINING COMPLETE :) *******" << endl;
   cout << endl;
-  nn->printWeights("leaky_weights.txt");
+  nn->printWeights("trial_weights.txt");
   cout << "Testing neural network now..." << endl;
   cout << endl;
 
