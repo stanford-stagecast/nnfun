@@ -44,8 +44,6 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool n
   return ret_mat;
 }
 
-
-
 void program_body()
 {
   auto nn = make_unique<
@@ -65,8 +63,13 @@ void program_body()
  /******************** TRAINING ********************/
   bool offset = true;
   bool noise = true;
+  int num_updates = 10;
+  bool verbose_updates = true;
   float tempo = 0;
   int iterations = 1000000;
+
+  cout << "Beginning training! You will receive " << num_updates << " updates." << endl << endl; 
+
   for ( int i = 0; i < iterations; i++ ) {
     float prob = get_rand(0, 1);
     if(prob < 0.4)
@@ -79,15 +82,47 @@ void program_body()
     }
     input = gen_time( tempo, offset, noise );
 
-    // Print Progress
-    if(i % 10000 == 0) {
-    cout << "training " << tempo << " bpm... (" << (float(i)/iterations)*100 << " percent done)" << endl;
-    }
 
     // Train the neural network
     ground_truth_output(0,0) = tempo;
     nn->apply_leaky(input);
     nn->leaky_gradient_descent( input, ground_truth_output, true );
+
+    if(i % (iterations/num_updates) == 0 && i > 0)
+    {
+      cout << "latest tempo: " << tempo << " bpm" << endl;
+      cout << "after " << (float(i)/iterations)*100 << " percent of training:" << endl;
+
+      if(verbose_updates){
+        for (  int tempo_test = 30; tempo_test < 241; tempo_test++ ) {
+          input = gen_time( tempo_test, offset, noise );
+          nn->apply_leaky(input);
+          cout << tempo_test << " -> " << nn->get_output()( 0, 0 ) << ", ";
+          if(tempo_test % 10 == 9) { cout << endl;}
+        }
+        cout << endl;
+      }
+      else{
+        float average_diff_of_ten = 0;
+        float average_diff = 0;
+        float diff;
+        for (  int tempo_test = 30; tempo_test < 241; tempo_test++ ) {
+          input = gen_time( tempo_test, offset, noise );
+          nn->apply_leaky(input);
+          diff = abs(tempo_test - nn->get_output()(0, 0));
+          average_diff_of_ten += abs(tempo_test - nn->get_output()(0, 0));
+          average_diff += diff;
+          if(tempo_test % 10 == 9) {
+            cout << "Avg diff on " << tempo_test - 9 << "s: " << average_diff_of_ten/10.0 << endl;
+            average_diff_of_ten = 0;
+          }
+        }
+        cout << "Overall average diff: " << average_diff/211.0 << endl;      
+      }
+      cout << endl;
+
+    }
+    
   }
   
   cout << endl;
@@ -111,7 +146,6 @@ void program_body()
   }
   cout << endl;
   cout << "Number of layers: " << num_layers << endl;
-  cout << "Size of layer 1: " << layer_size1 << endl;
   cout << "With noise? " << noise << endl;
   cout << "With offset? " << offset << endl;
   cout << "Number of Iterations: " << iterations << endl;
