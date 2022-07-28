@@ -33,7 +33,7 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool n
     amt_offset = get_rand(0.0, sbb);
   }
   for ( auto i = 0; i < 16; i++ ) {
-    ret_mat( i ) = (60.0/tempo) * i + offset; //[0, 0.25, 0.5, 0.75, 1, 1.25, ...] (backward in time)
+    ret_mat( i ) = (60.0/tempo) * i; //[0, 0.25, 0.5, 0.75, 1, 1.25, ...] (backward in time)
     if (noise) {
       float pct_noise = get_rand(-0.05, 0.05);
       float amt_noise = pct_noise * (60.0/tempo);
@@ -41,6 +41,7 @@ Matrix<float, batch_size, input_size> gen_time( float tempo, bool offset, bool n
     }
     ret_mat(i) += amt_offset;
   }
+
   return ret_mat;
 }
 
@@ -48,7 +49,7 @@ void program_body()
 {
   auto nn = make_unique<
     NeuralNetwork<float, num_layers, batch_size, input_size, output_size, layer_size1, layer_size2, layer_size3, layer_size4, output_size>>();
-  nn->initialize(0.000000001);
+  nn->initialize(0.0000000001);
 
   Matrix<float, batch_size, input_size> input;
   Matrix<float, batch_size, output_size> ground_truth_output;
@@ -66,7 +67,7 @@ void program_body()
   int num_updates = 10;
   bool verbose_updates = true;
   float tempo = 0;
-  int iterations = 1000000;
+  int iterations = 800000;
 
   cout << "Beginning training! You will receive " << num_updates << " updates." << endl << endl; 
 
