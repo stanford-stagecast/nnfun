@@ -349,7 +349,7 @@ public:
     return layer0.computeDeltasLastLayer( nextLayerDeltas );
   }
 
-    const Matrix<T, batch_size, i0> computeLeakyDeltas()
+  const Matrix<T, batch_size, i0> computeLeakyDeltas()
   {
     Matrix<T, batch_size, o0> nextLayerDeltas = Matrix<T, batch_size, o0>::Ones() / batch_size;
     return layer0.computeDeltasLastLayer( nextLayerDeltas );

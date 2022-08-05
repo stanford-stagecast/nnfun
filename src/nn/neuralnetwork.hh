@@ -238,8 +238,6 @@ public:
   
   void apply_leaky( const Matrix<T, batch_size, input_size>& input ) { nn->apply_leaky( input ); }
 
-  void apply_gelu( const Matrix<T, batch_size, input_size>& input ) { nn->apply_gelu( input ); }
-
   /*
    * Function Name: gradient_descent
    * Description: This function performs gradient descent based on the input
@@ -327,111 +325,47 @@ public:
   }
 
 
-void gelu_gradient_descent( Matrix<T, batch_size, input_size>& input,
-                         Matrix<T, batch_size, output_size>& ground_truth_output,
-                         bool dynamic )
-  {
-    nn->apply_gelu( input );
-    nn->computeDeltas();
-    nn->evaluateGradients( input );
-
-    if ( !dynamic ) {
-      float pd_loss_wrt_output = 0;
-      // assuming batch_size = 1
-      for ( int i = 0; i < (int)output_size; i++ ) {
-        pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
-      }
-
-      for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        nn->modifyParamWholeLayer( i, learning_rate * pd_loss_wrt_output );
-      }
-    } else {
-      // original
-      float current_loss = 0;
-      float pd_loss_wrt_output = 0;
-      for ( int i = 0; i < (int)output_size; i++ ) {
-        pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
-        current_loss += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
-      }
-
-      // 4/3 learning rate
-      float lr_4_3 = 4.0 / 3 * learning_rate;
-      // modifying weights and biases
-      for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        nn->modifyParamWholeLayer( i, lr_4_3 * pd_loss_wrt_output );
-      }
-      // compute loss
-      nn->apply_gelu( input );
-      float loss_4_3 = 0;
-      for ( int i = 0; i < (int)output_size; i++ ) {
-        loss_4_3 += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
-      }
-
-      // 2/3 learning rate
-      float lr_2_3 = 2.0 / 3 * learning_rate;
-      // modifying weights and biases
-      for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        nn->modifyParamWholeLayer( i, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output );
-      }
-      // compute loss
-      nn->apply_gelu( input );
-      float loss_2_3 = 0;
-      for ( int i = 0; i < (int)output_size; i++ ) {
-        loss_2_3 += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
-      }
-
-      float min_loss = min( min( current_loss, loss_4_3 ), loss_2_3 );
-      if ( min_loss == current_loss ) {
-        //  update learning rate
-        learning_rate = lr_2_3;
-        // update params
-        for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          nn->modifyParamWholeLayer( i, -lr_2_3 * pd_loss_wrt_output );
-        }
-      } else if ( min_loss == loss_4_3 ) {
-        //  update learning rate
-        learning_rate = lr_4_3;
-        // update params
-        for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          nn->modifyParamWholeLayer( i, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output );
-        }
-      } else {
-        //  no need
-      }
-    }
-  }
   void leaky_gradient_descent( Matrix<T, batch_size, input_size>& input,
                          Matrix<T, batch_size, output_size>& ground_truth_output,
-                         bool dynamic )
+                         bool dynamic, bool print_loss = false )
   {
     nn->apply_leaky( input );
     nn->computeLeakyDeltas();
     nn->evaluateGradients( input );
 
     if ( !dynamic ) {
-      float pd_loss_wrt_output = 0;
+      Matrix<float, batch_size, output_size> pd_loss_wrt_output;
       // assuming batch_size = 1
       for ( int i = 0; i < (int)output_size; i++ ) {
-        pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+        pd_loss_wrt_output(0, i) = compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
       }
 
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        nn->modifyParamWholeLayer( i, learning_rate * pd_loss_wrt_output );
+        nn->modifyParamWholeLayer( i, learning_rate * pd_loss_wrt_output(0, i) );
+      }
+      if(print_loss)
+      {
+        cout << "pd loss: " << pd_loss_wrt_output << endl;
       }
     } else {
       // original
       float current_loss = 0;
-      float pd_loss_wrt_output = 0;
+      Matrix<float, batch_size, output_size> pd_loss_wrt_output;
       for ( int i = 0; i < (int)output_size; i++ ) {
-        pd_loss_wrt_output += compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+        pd_loss_wrt_output(0, i) = compute_pd_loss_wrt_output( ground_truth_output( 0, i ), nn->output()( 0, i ) );
         current_loss += loss_function( ground_truth_output( 0, i ), nn->output()( 0, i ) );
+        if(print_loss)
+        {
+          cout << "actual: " << nn->output()(0, i) << ", truth: " << ground_truth_output(0, i) << endl;
+          cout << "pd loss: " << pd_loss_wrt_output << endl;
+        }
       }
 
       // 4/3 learning rate
       float lr_4_3 = 4.0 / 3 * learning_rate;
       // modifying weights and biases
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        nn->modifyParamWholeLayer( i, lr_4_3 * pd_loss_wrt_output );
+        nn->modifyParamWholeLayer( i, lr_4_3 * pd_loss_wrt_output(0, i) );
       }
       // compute loss
       nn->apply_leaky( input );
@@ -444,7 +378,7 @@ void gelu_gradient_descent( Matrix<T, batch_size, input_size>& input,
       float lr_2_3 = 2.0 / 3 * learning_rate;
       // modifying weights and biases
       for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-        nn->modifyParamWholeLayer( i, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output );
+        nn->modifyParamWholeLayer( i, ( -lr_4_3 + lr_2_3 ) * pd_loss_wrt_output(0, i) );
       }
       // compute loss
       nn->apply_leaky( input );
@@ -454,19 +388,23 @@ void gelu_gradient_descent( Matrix<T, batch_size, input_size>& input,
       }
 
       float min_loss = min( min( current_loss, loss_4_3 ), loss_2_3 );
+      if(print_loss)
+      {
+        cout << "loss: " << min_loss << endl;
+      }
       if ( min_loss == current_loss ) {
         //  update learning rate
         learning_rate = lr_2_3;
         // update params
         for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          nn->modifyParamWholeLayer( i, -lr_2_3 * pd_loss_wrt_output );
+          nn->modifyParamWholeLayer( i, -lr_2_3 * pd_loss_wrt_output(0, i) );
         }
       } else if ( min_loss == loss_4_3 ) {
         //  update learning rate
         learning_rate = lr_4_3;
         // update params
         for ( int i = 0; i < (int)nn->getNumLayers(); i++ ) {
-          nn->modifyParamWholeLayer( i, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output );
+          nn->modifyParamWholeLayer( i, ( -lr_2_3 + lr_4_3 ) * pd_loss_wrt_output(0, i) );
         }
       } else {
         //  no need

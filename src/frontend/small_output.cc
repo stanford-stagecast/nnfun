@@ -11,11 +11,11 @@ using namespace std;
 using namespace Eigen;
 
 constexpr size_t batch_size = 1;
-constexpr size_t input_size = 16;
+constexpr size_t input_size = 1;
 constexpr size_t output_size = 2;
-constexpr size_t num_layers = 5;
-constexpr size_t layer_size1 = 16;
-constexpr size_t layer_size2 = 1;
+constexpr size_t num_layers = 1;
+constexpr size_t layer_size1 = 2;
+constexpr size_t layer_size2 = 16;
 constexpr size_t layer_size3 = 2500;
 constexpr size_t layer_size4 = 2500;
 
@@ -59,16 +59,16 @@ Matrix<float, batch_size, output_size> gen_truth(
     float tempo, float next_note)
 {
   Matrix<float, batch_size, output_size> ret_mat;
-  ret_mat(0) = tempo;
+  ret_mat(0) = 60.0/tempo;
   ret_mat(1) = next_note;
-  return ret_mat;      
+  return ret_mat;
 }
 
 void program_body()
 {
   auto nn = make_unique<
-    NeuralNetwork<float, num_layers, batch_size, input_size, output_size, layer_size1, layer_size2, layer_size3, layer_size4, output_size>>();
-  nn->initialize(0.000000001);
+    NeuralNetwork<float, num_layers, batch_size, input_size, output_size, output_size>>();
+  nn->initialize(0.000001);
 
   Matrix<float, batch_size, input_size> input;
   Matrix<float, batch_size, output_size> ground_truth_output;
@@ -83,7 +83,7 @@ void program_body()
  /******************** TRAINING ********************/
   bool offset = false;
   bool noise = true;
-  int update_iter = 10000;
+  int update_iter = 10000000;
   bool verbose_updates = true;
   float tempo = 0;
   float training_threshold = 0.2;
@@ -101,7 +101,7 @@ void program_body()
   //for ( int i = 0; i < iterations; i++ ) {
   while(training){
     float prob = get_rand(0, 1);
-    if(prob < 0.4)
+    if(prob < 0.2)
     {
         tempo = get_rand(30, 50);
 
@@ -109,13 +109,20 @@ void program_body()
     else{
         tempo = get_rand(30, 240);
     }
-    input = gen_time( tempo, offset, noise );
-
+    //input = gen_time( tempo, offset, noise );
+    input(0,0) = 60.0/tempo;
 
     // Train the neural network
     ground_truth_output = gen_truth(tempo, -60.0/tempo);
     nn->apply_leaky(input);
-    nn->leaky_gradient_descent( input, ground_truth_output, true );
+    if(num_iter % update_iter == 0 && num_iter > 0)
+    {
+      nn->leaky_gradient_descent( input, ground_truth_output, false, true);
+    }
+    else{
+      nn->leaky_gradient_descent( input, ground_truth_output, false, false);
+
+    }
 
     if(num_iter % update_iter == 0 && num_iter > 0)
     {
@@ -123,12 +130,19 @@ void program_body()
       cout << "after " << num_iter << " iterations:" << endl;
 
       if(verbose_updates){
-        for (  int tempo_test = 30; tempo_test < 241; tempo_test++ ) {
-          input = gen_time( tempo_test, offset, noise );
+        for (  int tempo_test = 240; tempo_test < 241; tempo_test++ ) {
+          //input = gen_time( tempo_test, offset, noise );
+          input(0, 0) = 60.0/tempo_test;
+
           nn->apply_leaky(input);
-          cout << tempo_test << " -> " << nn->get_output() << ", " << endl;
+          cout << tempo_test << " -> " << nn->get_output() << ", " << gen_truth(tempo_test, -60.0/tempo_test) << endl;
           if(tempo_test % 10 == 9) { cout << endl;}
         }
+
+        nn->print();
+        cout << "Learning Rate: " << nn->get_current_learning_rate() << endl;
+
+
         cout << endl;
       }
       else{
@@ -136,7 +150,8 @@ void program_body()
         average_diff = 0;
         float diff;
         for (  int tempo_test = 30; tempo_test < 241; tempo_test++ ) {
-          input = gen_time( tempo_test, offset, noise );
+          //input = gen_time( tempo_test, offset, noise );
+          input(0, 0) = 60.0/tempo_test;
           nn->apply_leaky(input);
           diff = abs(tempo_test - nn->get_output()(0, 0));
           average_diff_of_ten += abs(tempo_test - nn->get_output()(0, 0));
