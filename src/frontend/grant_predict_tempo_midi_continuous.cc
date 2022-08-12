@@ -49,7 +49,7 @@ Matrix<float, batch_size, input_size> calculate_input( deque<float> times, int n
     }
   }
   cout << "Timestamps: {" << ret_mat << "}" << endl;
-  cout << "Current time: " << curr_time_secs << endl;
+  // cout << "Current time: " << curr_time_secs << endl;
   return ret_mat;
 }
 
@@ -61,7 +61,7 @@ void nn_input_from_piano( const string& midi_filename) {
                                       layer_size1, layer_size2, layer_size3, layer_size4, 
                                       output_size>>();
   nn->initialize(learning_rate);
-  string weights_file = "/home/gbishko/nnfun/src/frontend/grant_leaky_weights.txt";
+  string weights_file = "/home/emilypark/nnfun/src/frontend/grant_trial_weights.txt";
   nn->init_params(weights_file);
 
   /* Set Up Piano */
@@ -98,10 +98,15 @@ void nn_input_from_piano( const string& midi_filename) {
       [&] { return midi_processor.has_event(); } );
 
   /* Apply Neural Network */
-  while ( event_loop->wait_next_event( 50 ) != EventLoop::Result::Exit ) {
+  while ( event_loop->wait_next_event( 5000 ) != EventLoop::Result::Exit ) {
     ret_mat = calculate_input( press_queue, num_notes, base_time );
     nn->apply_leaky( ret_mat );
-    cout << "BPM Prediction: " <<  nn->get_output()( 0, 0 ) << endl;
+    float next_timestamp = nn->get_output()( 0, 0 );   // in how many seconds the next note should be played (-)
+    float most_recent_timestamp = ret_mat[0];          
+    float seconds_left = most_recent_timestamp + next_timestamp;    // how many seconds left until the next note should be played
+    if ( seconds_left >= -0.05 && seconds_left <= 0.05) {
+      cout << "\nPLAY NOTE NOW\n" << endl;
+    }
   }
 }
 
